@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'games',
+    # 'players',
+    # 'etc',
 ]
 
 MIDDLEWARE_CLASSES = [
