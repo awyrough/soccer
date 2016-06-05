@@ -31,7 +31,6 @@ class Command(BaseCommand):
             surface_id = stadium_data[8]
             is_soccer_specific = True if stadium_data[9] == "Y" else False
             
-            print surface_id
             
             stadium = Stadium.objects.create(
                 name=name,

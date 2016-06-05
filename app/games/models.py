@@ -16,7 +16,7 @@ class Game(models.Model):
 	date = models.DateField("date played")
 	homeTeam = models.ForeignKey('Team', related_name='homeTeam', default = -9999)
 	awayTeam = models.ForeignKey('Team', related_name='awayTeam', default = -9999)
-	stadium = models.ForeignKey('Stadium', null=True, blank=True)
+	stadium = models.ForeignKey('Stadium', null=True, blank=True, on_delete=models.SET_NULL)
 	attendance = models.IntegerField("Attendance", null=True, blank=True)
 	#add a weather FK at some point?
 	def __str__(self):
