@@ -9,7 +9,6 @@ Notes:
 	blank=True, null = True <- field is optional
 """
 
-# Create your models here.
 class Game(models.Model):
 	"""
 	Model for MLS Games and meta information.
@@ -23,7 +22,6 @@ class Game(models.Model):
 	def __str__(self):
 		return "%s" % self.date
 
-# Create Team model
 class Team(models.Model):
 	"""
 	Model for each soccer team
@@ -41,9 +39,33 @@ class Stadium(models.Model):
 	"""
 	Make a model for all stadiums used
 	"""
+	SURFACES = (
+		("1", "Grass"),
+		("2", "AstroTurf"),
+		("3", "FieldTurf"),
+		("4", "Turf"),
+		("5", "Bluegrass"),
+		("6", "Polytan"),
+		("7", "Team Pro EF RD"),
+		("8", "AstroTurf GameDay Grass 3D"),
+		("9", "Bermuda Bandera / Ryegrass Mixture")
+	)
 
-	name = models.CharField("Stadium Name", max_length = 200)
-	capacity = models.IntegerField("Capacity", default = 0)
+	name = models.CharField("Stadium Name", max_length=200)
+	capacity = models.IntegerField("Soccer-specific capacity", default=0)
+	year_opened = models.IntegerField(default=-9999)
+	is_primary = models.BooleanField("Regular MLS stadium", default=True)
+	surface = models.CharField(max_length=2, choices=SURFACES, default="1")
 
+	# home_team = models.ForeignKey(Team)
+
+	sw_id = models.IntegerField(unique=True)
+	city = models.CharField("Stadium City", max_length=200)
+	state = models.CharField("Stadium State", max_length=200)
+	soccer_specific = models.BooleanField(default=False)
+	
 	def __str__(self):
 		return self.name
+
+	def surface_type(self):
+		return self.SURFACES[int(self.surface) - 1][1]
