@@ -2,4 +2,4 @@ venv/
 app/*sqlite3
 *~
 *pyc
-raw_data/
+app/raw_data/*.csv
