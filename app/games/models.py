@@ -26,13 +26,16 @@ class Team(models.Model):
 	"""
 	Model for each soccer team
 	"""
-	#teamID automatically made
+
+	sw_id = models.IntegerField(unique=True)
 	name = models.CharField("Name", max_length = 50)
-	conference = models.CharField("Conference", max_length = 20, null=True)
+	conference = models.CharField("Conference", max_length = 20, null=True, blank=True)
 	city = models.CharField("City", max_length = 50, null=True, blank=True)
 	state = models.CharField("State", max_length = 20, null=True, blank=True)
-	yearJoined = models.IntegerField("yearJoined", default = -9999, null=True)
-
+	year_joined = models.IntegerField("yearJoined", default = -9999)
+	
+	def __str__(self):
+		return self.name
 
 # Create Stadium model
 class Stadium(models.Model):
