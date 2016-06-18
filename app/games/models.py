@@ -2,31 +2,17 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-"""
-Notes:
-	blank=True   <-  if T, then not required in form
-	null=True 	 <-  if T, then can be stored as Null
-	blank=True, null = True <- field is optional
-"""
-
 class Game(models.Model):
-	"""
-	Model for MLS Games and meta information.
-	"""
 	date = models.DateField("date played")
-	homeTeam = models.ForeignKey('Team', related_name='homeTeam', default = -9999)
-	awayTeam = models.ForeignKey('Team', related_name='awayTeam', default = -9999)
-	stadium = models.ForeignKey('Stadium', null=True, blank=True, on_delete=models.SET_NULL)
+	homeTeam = models.ForeignKey("Team", related_name="homeTeam", default = -9999)
+	awayTeam = models.ForeignKey("Team", related_name="awayTeam", default = -9999)
+	stadium = models.ForeignKey("Stadium", null=True, blank=True, on_delete=models.SET_NULL)
 	attendance = models.IntegerField("Attendance", null=True, blank=True)
-	#add a weather FK at some point?
+	
 	def __str__(self):
 		return "%s" % self.date
 
 class Team(models.Model):
-	"""
-	Model for each soccer team
-	"""
-
 	sw_id = models.IntegerField(unique=True)
 	name = models.CharField("Name", max_length = 50)
 	conference = models.CharField("Conference", max_length = 20, null=True, blank=True)
@@ -37,11 +23,7 @@ class Team(models.Model):
 	def __str__(self):
 		return self.name
 
-# Create Stadium model
 class Stadium(models.Model):
-	"""
-	Make a model for all stadiums used
-	"""
 	SURFACES = (
 		("1", "Grass"),
 		("2", "AstroTurf"),
