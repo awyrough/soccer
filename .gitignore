@@ -3,3 +3,4 @@ app/*sqlite3
 *~
 *pyc
 app/raw_data/*.csv
+*#

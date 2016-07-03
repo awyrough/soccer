@@ -13,6 +13,9 @@ class Game(models.Model):
 		return "%s vs. %s (%s)" % (self.homeTeam, self.awayTeam, self.date)
 
 	def location(self):
+		# The stadium field should only be populated
+		# i.f.f. the game is played at a location OTHER THAN
+		# the home team's main stadium?
 		if self.stadium:
 			return stadium
 		else:
@@ -52,7 +55,7 @@ class Stadium(models.Model):
 	is_primary = models.BooleanField("Regular MLS stadium", default=True)
 	surface = models.CharField(max_length=2, choices=SURFACES, default="1")
 
-	# home_team = models.ForeignKey(Team)
+	home_team = models.ForeignKey(Team)
 
 	sw_id = models.IntegerField(unique=True)
 	city = models.CharField("Stadium City", max_length=200)
