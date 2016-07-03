@@ -10,7 +10,16 @@ class Game(models.Model):
 	attendance = models.IntegerField("Attendance", null=True, blank=True)
 	
 	def __str__(self):
-		return "%s" % self.date
+		return "%s vs. %s (%s)" % (self.homeTeam, self.awayTeam, self.date)
+
+	def location(self):
+		if self.stadium:
+			return stadium
+		else:
+			return Stadium.objects.get(team=self.homeTeam)
+
+	class Meta:
+		unique_together = ["homeTeam", "awayTeam", "date"]
 
 class Team(models.Model):
 	sw_id = models.IntegerField(unique=True)
@@ -21,6 +30,7 @@ class Team(models.Model):
 	year_joined = models.IntegerField("yearJoined", default = -9999)
 	
 	def __str__(self):
+
 		return self.name
 
 class Stadium(models.Model):

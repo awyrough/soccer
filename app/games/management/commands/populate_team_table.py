@@ -32,10 +32,9 @@ class Command(BaseCommand):
                 name=team_name,
                 sw_id=sw_id,
                 city=city,
-                state=state,
-                year_joined=year_joined
+                state=state)
 
-            if year_joined != '': # if it isn't there, don't assign, let default
+            if year_joined:
                 team.year_joined = int(year_joined)
     
             team.save()
