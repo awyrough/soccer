@@ -26,5 +26,5 @@ class Command(BaseCommand):
             home_team = Team.objects.get(sw_id=home_team_id)
             away_team = Team.objects.get(sw_id=game_data[5])
             new_game = Game.objects.create(date=date,
-                                           homeTeam=home_team,
-                                           awayTeam=away_team)
+                                           home_team=home_team,
+                                           away_team=away_team)

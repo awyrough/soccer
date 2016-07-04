@@ -4,25 +4,24 @@ from django.db import models
 
 class Game(models.Model):
 	date = models.DateField("date played")
-	homeTeam = models.ForeignKey("Team", related_name="homeTeam", default = -9999)
-	awayTeam = models.ForeignKey("Team", related_name="awayTeam", default = -9999)
+	home_team = models.ForeignKey("Team", related_name="home_games", default = -9999)
+	away_team = models.ForeignKey("Team", related_name="away_games", default = -9999)
 	stadium = models.ForeignKey("Stadium", null=True, blank=True, on_delete=models.SET_NULL)
 	attendance = models.IntegerField("Attendance", null=True, blank=True)
 	
 	def __str__(self):
-		return "%s vs. %s (%s)" % (self.homeTeam, self.awayTeam, self.date)
+		return "%s vs. %s (%s)" % (self.home_team, self.away_team, self.date)
 
 	def location(self):
 		# The stadium field should only be populated
 		# i.f.f. the game is played at a location OTHER THAN
 		# the home team's main stadium?
 		if self.stadium:
-			return stadium
-		else:
-			return Stadium.objects.get(team=self.homeTeam)
+			return self.stadium
+		return Stadium.objects.filter(team=self.home_team)
 
 	class Meta:
-		unique_together = ["homeTeam", "awayTeam", "date"]
+		unique_together = ["home_team", "away_team", "date"]
 
 class Team(models.Model):
 	sw_id = models.IntegerField(unique=True)
