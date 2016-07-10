@@ -1,7 +1,7 @@
 import csv
 
 from django.core.management.base import BaseCommand, CommandError
-from games.models import Stadium
+from games.models import Stadium, Team
 
 class Command(BaseCommand):
     help = 'Populate stadium table'
@@ -31,12 +31,15 @@ class Command(BaseCommand):
             surface_id = stadium_data[8]
             is_soccer_specific = True if stadium_data[9] == "Y" else False
             
+
+            home_team = Team.objects.get(name=stadium_data[2])
             
             stadium = Stadium.objects.create(
                 name=name,
                 sw_id=sw_id,
                 city=city,
                 state=state,
+                home_team=home_team,
                 is_primary=is_primary,
                 capacity=int(capacity),
                 soccer_specific=is_soccer_specific)

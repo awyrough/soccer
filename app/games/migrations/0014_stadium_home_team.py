@@ -38,5 +38,4 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='games.Team'),
             preserve_default=False,
         ),
-        migrations.RunPython(add_team, reverse_func),
     ]

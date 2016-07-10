@@ -4,13 +4,17 @@ from django.db import models
 
 class Game(models.Model):
 	date = models.DateField("date played")
-	home_team = models.ForeignKey("Team", related_name="home_games", default = -9999)
-	away_team = models.ForeignKey("Team", related_name="away_games", default = -9999)
-	stadium = models.ForeignKey("Stadium", null=True, blank=True, on_delete=models.SET_NULL)
+	home_team = models.ForeignKey("Team", related_name="home_games",
+				      default = -9999)
+	away_team = models.ForeignKey("Team", related_name="away_games",
+				      default = -9999)
+	stadium = models.ForeignKey("Stadium", null=True, blank=True,
+				    on_delete=models.SET_NULL)
 	attendance = models.IntegerField("Attendance", null=True, blank=True)
 	
 	def __str__(self):
-		return "%s vs. %s (%s)" % (self.home_team, self.away_team, self.date)
+		return "%s vs. %s (%s)" % (
+			self.home_team, self.away_team, self.date)
 
 	def location(self):
 		# The stadium field should only be populated
@@ -26,7 +30,8 @@ class Game(models.Model):
 class Team(models.Model):
 	sw_id = models.IntegerField(unique=True)
 	name = models.CharField("Name", max_length = 50)
-	conference = models.CharField("Conference", max_length = 20, null=True, blank=True)
+	conference = models.CharField(
+		"Conference", max_length = 20, null=True, blank=True)
 	city = models.CharField("City", max_length = 50, null=True, blank=True)
 	state = models.CharField("State", max_length = 20, null=True, blank=True)
 	year_joined = models.IntegerField("yearJoined", default = -9999)
