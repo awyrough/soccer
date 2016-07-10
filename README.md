@@ -1,3 +1,20 @@
 # soccer
 
-# AJ's Edit
+### How to restore the database
+- Go to the main directory of the django project `app/`
+
+```
+~/soccer:> cd app/
+```
+
+- If this is your first time, make the script executable
+
+```
+chmod 0775 scripts/restore.sh
+```
+
+- Run the script
+
+```
+./scripts/restore.sh
+```
