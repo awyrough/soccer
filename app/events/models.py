@@ -64,7 +64,7 @@ class StatisticEvent(GameEvent):
 		("YELLOW_CARD", "Yellow Card"),
 	)
 	
-	action = models.CharField(max_length=50, choices=ACTIONS, default="PASS")
+	action = models.CharField(max_length=50, choices=ACTIONS, default="TOUCH")
 	#player = models.ForeignKey(Player, related_name="actions", null=True,
 	#			   default=null, on_delete=models.SET_DEFAULT)
 	#team = models.ForeignKey(Team, related_name="actions", null=True,
