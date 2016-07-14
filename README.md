@@ -18,3 +18,9 @@ chmod 0775 scripts/restore.sh
 ```
 ./scripts/restore.sh
 ```
+
+### How to import statistics event
+
+```
+> python manage.py populate_statistic_events --file <file>
+```

@@ -56,7 +56,7 @@ class StatisticEvent(GameEvent):
 		("PENALTY_SHOT", "Penalty Shot"),
 		("RED_CARD", "Red Card"),
 		("SHOT", "Shot"),
-		("START_HALF", "Start Half"),
+		("START_OF_HALF", "Start Of Half"),
 		("SUBSTITUTION", "Substitution"),
 		("TACKLE", "Tackle"),
 		("THROWN_IN", "Thrown In"),
@@ -64,11 +64,19 @@ class StatisticEvent(GameEvent):
 		("YELLOW_CARD", "Yellow Card"),
 	)
 	
-	action = models.CharField(max_length=50, choices=ACTIONS, default="TOUCH")
+	action = models.CharField(max_length=50, choices=ACTIONS,
+				  default="TOUCH")
 	#player = models.ForeignKey(Player, related_name="actions", null=True,
 	#			   default=null, on_delete=models.SET_DEFAULT)
 	#team = models.ForeignKey(Team, related_name="actions", null=True,
 	#			 default=null, on_delete=models.SET_DEFAULT)
+	def __str__(self):
+		# TODO: include time in here
+		return "%s: %s" % (str(self.game), self.action)
+
+	class Meta:
+		# TODO(hillwyrough): define unique together
+		pass
 
 class Goal(GameEvent):
 	"""
