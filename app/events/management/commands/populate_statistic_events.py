@@ -47,7 +47,7 @@ class Command(BaseCommand):
 
         # to prevent constantly looking things up
         name_to_team = {}
-        game_title_to_game = {}
+        games = set()
         
         statistic_events = []
 
@@ -60,10 +60,13 @@ class Command(BaseCommand):
             
             # this is really fragile, can we guarentee the team names
             # in the file are a certain format?
-            team_str = event[0]
+            team_str = event[1]
             split_str = " v "
-            home_team_name = team_str.split(split_str)[0].strip()
-            away_team_name = team_str.split(split_str)[1].strip()
+            home_team_name = team_str.split(split_str)[0].strip() \
+                .replace("FC", "").strip()
+            away_team_name = team_str.split(split_str)[1].strip() \
+                .replace("FC", "").strip()
+
             if (home_team_name in name_to_team):
                 home_team = name_to_team[home_team_name]
             else:
@@ -76,17 +79,15 @@ class Command(BaseCommand):
                 away_team = Team.objects.get(name__contains=away_team_name)
                 name_to_team[away_team_name] = away_team
                 
-            if (team_str in game_title_to_game):
-                game = game_title_to_game[team_str]
-            else:
-                game = Game.objects \
-                        .filter(date__year=2015) \
-                        .get(home_team=home_team, away_team=away_team)
-                game_title_to_game[team_str] = game
+            game = Game.objects.filter(date=event[0]) \
+                .filter(home_team=home_team) \
+                .get(away_team=away_team)
+            games.add(game)
             
-            half = 1 if event[1] == "First Half" else 2
-            time = float(event[2])
-            event_action = "_".join(event[3].upper().split(" "))
+
+            half = 1 if event[2] == "First Half" else 2
+            time = float(event[3])
+            event_action = "_".join(event[4].upper().split(" "))
             
             statistic_events.append(
                 StatisticEvent(
@@ -101,8 +102,8 @@ class Command(BaseCommand):
         if dry_run:
             return
         if clear:
-            StatisticEvent.objects \
-                .filter(game__in=list(game_title_to_game.values())) \
+            deleted = StatisticEvent.objects \
+                .filter(game__in=list(games)) \
                 .distinct().delete()
         all_created = StatisticEvent.objects.bulk_create(statistic_events)
         print("Created %d statistic events" % len(all_created))
