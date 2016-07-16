@@ -9,6 +9,13 @@ class GameEvent(models.Model):
 	Abstract class for game events.
 	This should hold any common fields among all game-level events.
 	"""
+	FIRST_HALF_START_MINUTE = 0.0
+	FIRST_HALF_START_SECOND = 0.0
+	SECOND_HALF_START_MINUTE = 45.0
+	SECOND_HALF_START_SECOND = 2700.0
+	EXTRA_TIME_START_MINUTE = 90.0
+	EXTRA_TIME_START_SECOND = 5400.0
+
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
 	half = models.IntegerField(default=1, choices=((1,1), (2,2), (3,3)))
 	seconds = models.FloatField(default=0.0)
@@ -19,6 +26,25 @@ class GameEvent(models.Model):
 		design pattern.
 		"""
 		abstract = True
+
+	def is_first_half(self):
+		return self.half == 1
+
+	def is_second_half(self):
+		return self.half == 2
+	
+	def is_extra_time(self):
+		return self.half >= 3
+
+	def get_minute(self, rounding=1):
+		minutes = self.seconds / 60.0
+		if (self.half == 1):
+			minutes = self.FIRST_HALF_START_MINUTE + minutes
+		if (self.half == 2):
+			minutes =  self.SECOND_HALF_START_MINUTE + minutes
+		if (self.half == 3):
+			minutes = self.EXTRA_TIME_START_MINUTE + minutes
+		return round(minutes, rounding)
 
 class StatisticEvent(GameEvent):
 	ACTIONS = (
@@ -71,8 +97,9 @@ class StatisticEvent(GameEvent):
 	#team = models.ForeignKey(Team, related_name="actions", null=True,
 	#			 default=null, on_delete=models.SET_DEFAULT)
 	def __str__(self):
-		# TODO: include time in here
-		return "%s: %s" % (str(self.game), self.action)
+		return "%s: %s @ %s" % (self.game, 
+					self.action,
+					str(self.get_minute()))
 
 	class Meta:
 		# TODO(hillwyrough): define unique together
