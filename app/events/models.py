@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from games.models import Game
+from games.models import Game, Team
 
 class GameEvent(models.Model):
 	"""
@@ -94,12 +94,14 @@ class StatisticEvent(GameEvent):
 				  default="TOUCH")
 	#player = models.ForeignKey(Player, related_name="actions", null=True,
 	#			   default=null, on_delete=models.SET_DEFAULT)
-	#team = models.ForeignKey(Team, related_name="actions", null=True,
-	#			 default=null, on_delete=models.SET_DEFAULT)
+	action_team = models.ForeignKey(Team, related_name="actions", null=True,
+				 default="", on_delete=models.SET_DEFAULT)
 	def __str__(self):
-		return "%s: %s @ %s" % (self.game, 
+		return "%s: %s %s @ %s (hf = %s)" % (self.game, 
+					self.action_team,
 					self.action,
-					str(self.get_minute()))
+					str(self.get_minute()),
+					self.half)
 
 	class Meta:
 		# TODO(hillwyrough): define unique together

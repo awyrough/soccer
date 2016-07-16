@@ -88,13 +88,17 @@ class Command(BaseCommand):
             half = 1 if event[2] == "First Half" else 2
             time = float(event[3])
             event_action = "_".join(event[4].upper().split(" "))
-            
+
+            action_team_name = event[6].replace("FC", "").strip()
+            action_team = Team.objects.get(name__contains=action_team_name)
+
             statistic_events.append(
                 StatisticEvent(
                     game=game,
                     half=half,
                     seconds=time,
                     action=event_action,
+                    action_team=action_team,
                     )
                 )
 
