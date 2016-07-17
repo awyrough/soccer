@@ -7,7 +7,7 @@ from games.models import *
 from events.models import *
 
 class Command(BaseCommand):
-	help = 'SJE querying file'
+	help = 'populated game querying file'
 
 	def add_arguments(self,parser):
 		#add team sw_id argument

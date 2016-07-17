@@ -46,6 +46,18 @@ class GameEvent(models.Model):
 			minutes = self.EXTRA_TIME_START_MINUTE + minutes
 		return round(minutes, rounding)
 
+	# always return the raw number, so we can choose later to round up using math.ceil()
+	"""How do we return 45+stoppage vs. 46 min?"""
+	def get_minute_exact(self):
+		minutes = self.seconds / 60.0
+		if (self.half == 1):
+			minutes = self.FIRST_HALF_START_MINUTE + minutes
+		if (self.half == 2):
+			minutes =  self.SECOND_HALF_START_MINUTE + minutes
+		if (self.half == 3):
+			minutes = self.EXTRA_TIME_START_MINUTE + minutes
+		return minutes
+
 class StatisticEvent(GameEvent):
 	ACTIONS = (
 		("BLOCK", "Block"),

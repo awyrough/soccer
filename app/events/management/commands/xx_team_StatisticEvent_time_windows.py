@@ -1,7 +1,11 @@
-# xx_team_StatisticEvents.py
+# xx_team_StatisticEvent_time_windows.py
 
 # This script takes an input of a team's sw_id 
-# and outputs all of the team's statistic events for the type you ask for
+# and outputs all of the time windows of a team's statistic events 
+# for the type you ask for
+
+import math
+
 from django.core.management.base import BaseCommand, CommandError
 from games.models import *
 from events.models import *
@@ -46,20 +50,35 @@ class Command(BaseCommand):
 		# order list by date
 		db_team_games = db_team_games.order_by('date')
 
-		# for each game in the DB for this team, find the games that have populated Stats
+		# find if there are games with populated stats
 		no_games = True
 		for game in db_team_games:
 			g = StatisticEvent.objects.filter(game = game)
-
 			if g:
 				no_games = False
-				
-				for item in g:
-					if item.action in arg_stat_events and \
-									item.action_team == db_team:
-						print(item)
 
 		if no_games:
 			raise Exception(str(db_team) + " has no statistics populated in the DB")
 
+
+		# produce a set of time_windows (for aggregation of other stats)
+		time_windows = {}
+
+		for game in db_team_games:
+			g = StatisticEvent.objects.filter(game = game)
+
+			if g:
+				time_windows[game.date] = [] #add a key to the dict for the date of the game
+
+				for item in g:
+					if item.action in arg_stat_events:
+						tw = math.ceil(item.get_minute_exact())
+						time_windows[game.date].append(tw)
+
+
+
+		for date in time_windows:
+			print(date)
+			print(time_windows[date])
+			print("")
 					

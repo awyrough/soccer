@@ -7,7 +7,7 @@ from games.models import Game, Team
 from events.models import StatisticEvent
 
 class Command(BaseCommand):
-	help = 'SJE querying file'
+	help = 'team querying file'
 
 	def add_arguments(self,parser):
 		#add team sw_id argument
