@@ -143,3 +143,17 @@ class DisciplinaryAction(GameEvent):
 		- type (red/yellow)
 	"""
 	pass
+
+class TimeEvent(models.Model):
+	team = models.ForeignKey(Team, on_delete=models.CASCADE)
+	game = models.ForeignKey(Game, on_delete=models.CASCADE)
+	
+	# TODO(hillwyrough): set bounds on these fields for values
+	time_on_pitch = models.FloatField()
+	minute = models.IntegerField()
+	
+	home_score = models.IntegerField()
+	away_score = models.IntegerField()
+	
+	# define stats
+	passes = models.IntegerField()
