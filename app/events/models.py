@@ -157,3 +157,9 @@ class TimeEvent(models.Model):
 	
 	# define stats
 	passes = models.IntegerField()
+
+	def _is_first_half_extra_time(self):
+		return self.minute == -2
+
+	def _is_second_half_extra_time(self):
+		return self.miinute == -1
