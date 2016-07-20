@@ -210,4 +210,4 @@ class TimeEvent(models.Model):
 		return self.minute == -2
 
 	def _is_second_half_extra_time(self):
-		return self.miinute == -1
+		return self.minute == -1
