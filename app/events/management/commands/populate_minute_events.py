@@ -118,6 +118,7 @@ class Command(BaseCommand):
 
             #stats
             passes = int(event[9])
+            
 
             minute_events.append(
                 TimeEvent(
@@ -127,7 +128,47 @@ class Command(BaseCommand):
                     minute=minute,
                     home_score=home_score,
                     away_score=away_score,
-                    passes=passes
+                    passes=passes,
+                    passes_succ=int(event[10]) if event[10] != "NULL" else 0,
+                    passes_unsucc=int(event[11]) if event[11] != "NULL" else 0,
+                    passes_received=int(event[14]) if event[10] != "NULL" else 0,
+                    shots=int(event[15]) if event[15] != "NULL" else 0,
+                    shots_on_target=int(event[16]) if event[16] != "NULL" else 0,
+                    goals=int(event[17]) if event[17] != "NULL" else 0,
+                    offsides=int(event[18]) if event[18] != "NULL" else 0,
+                    dribbles=int(event[19]) if event[19] != "NULL" else 0,
+                    crosses=int(event[20]) if event[20] != "NULL" else 0,
+                    corners_taken=int(event[21]) if event[21] != "NULL" else 0,
+                    free_kicks_taken=int(event[22]) if event[22] != "NULL" else 0,
+                    fouls=int(event[23]) if event[23] != "NULL" else 0,
+                    fouled=int(event[24]) if event[24] != "NULL" else 0,
+                    yellow_cards=int(event[25]) if event[25] != "NULL" else 0,
+                    red_cards=int(event[26]) if event[26] != "NULL" else 0,
+                    tackles=int(event[27]) if event[27] != "NULL" else 0,
+                    tackled=int(event[28]) if event[28] != "NULL" else 0,
+                    blocks=int(event[29]) if event[29] != "NULL" else 0,
+                    interceptions=int(event[30]) if event[30] != "NULL" else 0,
+                    clearances=int(event[31]) if event[31] != "NULL" else 0,
+                    blocked_shots=int(event[32]) if event[32] != "NULL" else 0,
+                    shots_on_target_ex_blocked=int(event[33]) if event[33] != "NULL" else 0,
+                    shots_off_target_ex_blocked=int(event[34]) if event[34] != "NULL" else 0,
+                    shots_inside_box=int(event[35]) if event[35] != "NULL" else 0,
+                    shots_on_target_inside_box=int(event[36]) if event[36] != "NULL" else 0,
+                    shots_outside_box=int(event[37]) if event[37] != "NULL" else 0,
+                    shots_on_target_outside_box=int(event[38]) if event[38] != "NULL" else 0,
+                    goals_inside_box=int(event[40]) if event[40] != "NULL" else 0,
+                    goals_outside_box=int(event[41]) if event[41] != "NULL" else 0,
+                    entries_final_third=int(event[58]) if event[58] != "NULL" else 0,
+                    entries_pen_area=int(event[59]) if event[59] != "NULL" else 0,
+                    entries_pen_area_succ=int(event[60]) if event[60] != "NULL" else 0,
+                    entries_pen_area_unsucc=int(event[61]) if event[61] != "NULL" else 0,
+                    first_time_passes=int(event[78]) if event[78] != "NULL" else 0,
+                    first_time_passes_complete=int(event[79]) if event[79] != "NULL" else 0,
+                    first_time_passes_incomplete=int(event[80]) if event[80] != "NULL" else 0,
+                    passes_attempted_ownhalf=int(event[83]) if event[83] != "NULL" else 0,
+                    passes_successful_ownhalf=int(event[84]) if event[84] != "NULL" else 0,
+                    passes_attempted_opphalf=int(event[85]) if event[85] != "NULL" else 0,
+                    passes_successful_opphalf=int(event[86]) if event[86] != "NULL" else 0,
                     )
                 )
 

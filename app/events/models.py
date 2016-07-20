@@ -144,6 +144,9 @@ class DisciplinaryAction(GameEvent):
 	"""
 	pass
 
+def _default_moment_value():
+	return models.IntegerField(default=0)
+
 class TimeEvent(models.Model):
 	team = models.ForeignKey(Team, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
@@ -152,11 +155,56 @@ class TimeEvent(models.Model):
 	time_on_pitch = models.FloatField()
 	minute = models.IntegerField()
 	
-	home_score = models.IntegerField()
-	away_score = models.IntegerField()
+	home_score = _default_moment_value()
+	away_score = _default_moment_value()
 	
 	# define stats
-	passes = models.IntegerField()
+	passes = _default_moment_value()
+	passes_succ = _default_moment_value()
+	passes_unsucc = _default_moment_value()
+	passes_received = _default_moment_value()
+	
+	shots = _default_moment_value()
+	shots_on_target = _default_moment_value()
+	goals = _default_moment_value()
+	
+	offsides = _default_moment_value()
+	
+	dribbles = _default_moment_value()
+	crosses = _default_moment_value()
+	corners_taken = _default_moment_value()
+	free_kicks_taken = _default_moment_value()
+	
+	fouls = _default_moment_value()
+	fouled = _default_moment_value()
+	yellow_cards = _default_moment_value()
+	red_cards = _default_moment_value()
+	
+	tackles = _default_moment_value()
+	tackled = _default_moment_value()
+	blocks = _default_moment_value()
+	interceptions = _default_moment_value()
+	clearances = _default_moment_value()
+	blocked_shots = _default_moment_value()
+	shots_on_target_ex_blocked = _default_moment_value()
+	shots_off_target_ex_blocked = _default_moment_value()
+	shots_inside_box = _default_moment_value()
+	shots_on_target_inside_box = _default_moment_value()
+	shots_outside_box = _default_moment_value()
+	shots_on_target_outside_box = _default_moment_value()
+	goals_inside_box = _default_moment_value()
+	goals_outside_box = _default_moment_value()
+	entries_final_third = _default_moment_value()
+	entries_pen_area = _default_moment_value()
+	entries_pen_area_succ = _default_moment_value()
+	entries_pen_area_unsucc = _default_moment_value()
+	first_time_passes = _default_moment_value()
+	first_time_passes_complete = _default_moment_value()
+	first_time_passes_incomplete = _default_moment_value()
+	passes_attempted_ownhalf = _default_moment_value()
+	passes_successful_ownhalf = _default_moment_value()
+	passes_attempted_opphalf = _default_moment_value()
+	passes_successful_opphalf = _default_moment_value()
 
 	def _is_first_half_extra_time(self):
 		return self.minute == -2
