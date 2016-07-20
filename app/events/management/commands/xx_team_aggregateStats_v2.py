@@ -71,6 +71,12 @@ def agg_stat_passing(game, primary_team, metric, gs_definer):
 			agg_value += time_events[-1].passes
 			used_second_stoppage = True
 
+			if not used_first_stoppage:
+				if start > 45:
+					raise Exception("AJ's logic is wrong for aggregating")
+				agg_value += time_events[-2].passes
+				used_first_stoppage = True
+				
 			tw = [start,"90.0+"]
 			agg_list.append([tw, meta_info, agg_value])
 
