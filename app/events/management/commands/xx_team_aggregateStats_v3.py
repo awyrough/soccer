@@ -15,13 +15,15 @@ from games.models import *
 from events.models import *
 
 def aggregate_statistic(game, primary_team, metric, gs_definer):
+		workable_metrics = ["passes","shots"]
+
 		#use the below while all we have is passes in the per 1 min stat file
-		if metric != "passes":
-			raise Exception("Can only analyze passes right now")
+		if metric not in workable_metrics:
+			raise Exception("Can't analyze " + metric + " right now; use: " + str(workable_metrics))
 
 		#for the future, break up calculations based on type of metric
-		#if metric in ["passes"]:
-		agg_list = agg_stat_discrete_sum(game, primary_team, metric, gs_definer)
+		if metric in workable_metrics:
+			agg_list = agg_stat_discrete_sum(game, primary_team, metric, gs_definer)
 
 		return agg_list
 
@@ -77,6 +79,7 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 		if last_item[1] != -1: #-1 in this case represents the 90+'
 			game_states.append((last_item[1],-1,meta_info))
 
+
 		# iterate through all the game state windows and find the appropriate time_events to aggregate
 		for tupl in game_states:
 			tw = [tupl[0], tupl[1]]
@@ -92,25 +95,35 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 			#When 1st half stoppage time is start of tw 
 			if tupl[0] == -2:
 				if_count += 1
-				#(so we don't want to incl stoppage)
-				for key in sorted(time_events.iterkeys()):
+				#(so we don't want to incl 1st half stoppage)
+				
+				if tupl[1] == -1:
+					for key in sorted(time_events.iterkeys()):
+						if key >= 46:
+							agg_value += getattr(time_events[key], metric)
+
+					agg_value += getattr(second_stoppage, metric)
+					used_second_stoppage = True
+
+				elif tupl[1] <= 90:
 					if key >= 46 and key <= tupl[1]:
-						agg_value += time_events[key].passes
+						agg_value += getattr(time_events[key], metric)
+
 
 			#When 2nd half stoppage time is end of tw
 			elif tupl[1] == -1:
 				if_count += 1
 				for key in sorted(time_events.iterkeys()):
 					if key > tupl[0]:
-						agg_value += time_events[key].passes
+						agg_value += getattr(time_events[key], metric)
 
 				if not used_second_stoppage:
-					agg_value += second_stoppage.passes
+					agg_value += getattr(second_stoppage, metric)
 					used_second_stoppage = True
 
 				if tupl[0] <= 45:
 					if not used_first_stoppage:
-						agg_value += first_stoppage.passes
+						agg_value += getattr(first_stoppage, metric)
 						used_first_stoppage = True
 
 			#When 1st half stoppage time is end of tw
@@ -118,10 +131,10 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 				if_count += 1
 				for key in sorted(time_events.iterkeys()):
 					if key > tupl[0] and key <= 45:
-						agg_value += time_events[key].passes
+						agg_value += getattr(time_events[key], metric)
 
 				if not used_first_stoppage:
-					agg_value += first_stoppage.passes
+					agg_value += getattr(first_stoppage, metric)
 					used_first_stoppage = True
 
 			#For every other case
@@ -129,11 +142,11 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 				if_count += 1
 				for key in sorted(time_events.iterkeys()):
 					if key > tupl[0] and key <= tupl[1]:
-						agg_value += time_events[key].passes
+						agg_value += getattr(time_events[key], metric)
 				#check if the first half stoppage window falls within this "other case"
 				if tupl[0] <= 45.0 and tupl[1] >= 46.0:
 					if not used_first_stoppage:
-						agg_value += first_stoppage.passes
+						agg_value += getattr(first_stoppage, metric)
 						used_first_stoppage = True
 
 			#We shouldn't ever use multiple conditions
