@@ -8,6 +8,7 @@
 # OUTPUT: aggregated stats for the games
 
 import math
+import datetime
 
 from django.core.management.base import BaseCommand, CommandError
 from games.models import *
@@ -43,10 +44,17 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 			else:
 				time_events[item.minute] = item
 
+		# for key in time_events:
+		# 	print(getattr(time_events[key], metric))
+
 		agg_list = []
-		"""NEED TO FIX THESE"""
 		used_first_stoppage = False
+		if not first_stoppage:	#account the possibility of no agg statistic for stoppage times
+			used_first_stoppage = True
+		
 		used_second_stoppage = False
+		if not second_stoppage:
+			used_second_stoppage = True
 
 		#remove stoppage times:
 		start = 0.0
@@ -61,7 +69,8 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 			meta_info = moment[1]
 
 		if not game_states:
-			raise Exception("Check why there aren't any game states")
+			return [[[0.0,-1],"No Defined Moments in Game", " "]]
+			#raise Exception("Check why there aren't any game states")
 
 		# add in one last game state window if it doesn't reach the end of the game
 		last_item = game_states[-1] #last item in the game_states list
@@ -95,8 +104,14 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 					if key > tupl[0]:
 						agg_value += time_events[key].passes
 
-				agg_value += second_stoppage.passes
-				used_second_stoppage = True
+				if not used_second_stoppage:
+					agg_value += second_stoppage.passes
+					used_second_stoppage = True
+
+				if tupl[0] <= 45:
+					if not used_first_stoppage:
+						agg_value += first_stoppage.passes
+						used_first_stoppage = True
 
 			#When 1st half stoppage time is end of tw
 			elif tupl[1] == -2:
@@ -105,8 +120,9 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 					if key > tupl[0] and key <= 45:
 						agg_value += time_events[key].passes
 
-				agg_value += first_stoppage.passes
-				used_first_stoppage = True
+				if not used_first_stoppage:
+					agg_value += first_stoppage.passes
+					used_first_stoppage = True
 
 			#For every other case
 			else:
@@ -116,8 +132,9 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 						agg_value += time_events[key].passes
 				#check if the first half stoppage window falls within this "other case"
 				if tupl[0] <= 45.0 and tupl[1] >= 46.0:
-					agg_value += first_stoppage.passes
-					used_first_stoppage = True
+					if not used_first_stoppage:
+						agg_value += first_stoppage.passes
+						used_first_stoppage = True
 
 			#We shouldn't ever use multiple conditions
 			if if_count != 1:
@@ -171,6 +188,12 @@ class Command(BaseCommand):
 			default="",
 			help="List of metrics to pull",
 			)
+		parser.add_argument(
+			"--daterange",
+            dest="daterange",
+            default=False,
+            help="comma separated start and end dates",
+            )
 	
 	def handle(self,*args,**options):
 		# Check to make sure the appropriate arguments are input
@@ -198,12 +221,26 @@ class Command(BaseCommand):
 
 		arg_metrics = options["metrics"].split(";")
 
+
+		arg_daterange = options["daterange"]
+		if arg_daterange:
+			arg_daterange = arg_daterange.split(";")
+			arg_daterange[0] = datetime.datetime.strptime(arg_daterange[0], "%m/%d/%Y")
+			arg_daterange[1] = datetime.datetime.strptime(arg_daterange[1], "%m/%d/%Y")
+
+			if arg_daterange[1] < arg_daterange[0]:
+				raise Exception("Wrong date order")
+
 		# pull the team name
 		db_team = Team.objects.get(sw_id=arg_sw_id)
 		print("\nTEAM: " + str(db_team))
 
 		# find all home/away games for the team, and order ASC by date
-		db_team_games = Game.objects.filter(home_team = db_team) | Game.objects.filter(away_team = db_team)
+		if arg_daterange:
+			db_team_games = Game.objects.filter(home_team = db_team, date__range=[arg_daterange[0],arg_daterange[1]]) | Game.objects.filter(away_team = db_team, date__range=[arg_daterange[0],arg_daterange[1]])
+		else:
+			db_team_games = Game.objects.filter(home_team = db_team) | Game.objects.filter(away_team = db_team)
+
 		db_team_games = db_team_games.order_by('date')
 
 		# find if there are games with populated stats
@@ -261,14 +298,14 @@ class Command(BaseCommand):
 		# FOR EACH METRIC, by game (for which we have moments), aggregate the stats
 		for metric in arg_metrics:
 			print("\nMETRIC = " + str(metric))
-			for date in game_state_definer:
+			for date in sorted(game_state_definer):
 				game = games_and_dates[date]
 				
-				print("GAME = " + str(game))
+				print("\n  GAME = " + str(game))
 
 				agg_s = aggregate_statistic(game,db_team,metric,game_state_definer[date])
 
 				for item in agg_s:
 					print("\t" + str(item[0]) \
 						+ "\t" + str(item[1]) + "\t" + str(item[2]))
-					
+				

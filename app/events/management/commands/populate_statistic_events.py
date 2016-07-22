@@ -53,6 +53,7 @@ class Command(BaseCommand):
 
         # iterate over the rows
         first = True
+        count = 0
         for event in reader:
             if first:
                 first = False
@@ -66,6 +67,11 @@ class Command(BaseCommand):
                 .replace("FC", "").strip()
             away_team_name = team_str.split(split_str)[1].strip() \
                 .replace("FC", "").strip()
+
+            if home_team_name == "Los Angeles Galaxy":
+                home_team_name = "Galaxy"
+            if away_team_name == "Los Angeles Galaxy":
+                away_team_name = "Galaxy"
 
             if (home_team_name in name_to_team):
                 home_team = name_to_team[home_team_name]
@@ -90,6 +96,10 @@ class Command(BaseCommand):
             event_action = "_".join(event[4].upper().split(" "))
 
             action_team_name = event[6].replace("FC", "").strip()
+
+            if action_team_name == "Los Angeles Galaxy":
+                action_team_name = "Galaxy"
+
             action_team = Team.objects.get(name__contains=action_team_name)
 
             statistic_events.append(
@@ -102,6 +112,9 @@ class Command(BaseCommand):
                     )
                 )
 
+            count += 1
+            if count % 2500 == 0:
+                print("Statistic Events Created = " + str(count))
         
         if dry_run:
             return
