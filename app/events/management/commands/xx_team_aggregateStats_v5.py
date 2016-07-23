@@ -73,6 +73,7 @@ def agg_stat_discrete_sum(game, primary_team, metric, gs_definer):
 		# 	print(getattr(time_events[key], metric))
 
 		agg_list = []
+		
 		used_first_stoppage = False
 		if not first_stoppage:	#account the possibility of no agg statistic for stoppage times
 			used_first_stoppage = True
