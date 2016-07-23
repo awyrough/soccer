@@ -1,4 +1,4 @@
-# xx_team_aggregateStats_v3.py
+# xx_team_aggregateStats_v4.py
 
 # INPUT: 1) a team's sw_id
 #		 2) the type of statistic events by which you want to define a moment
@@ -13,6 +13,25 @@ import datetime
 from django.core.management.base import BaseCommand, CommandError
 from games.models import *
 from events.models import *
+
+def time_window_length(time_window_list):
+	start = time_window_list[0]
+	end = time_window_list[1]
+
+	additional = 0.0
+
+	if ((start != -2) and (start < 46)) and end >= 46: # if the TW passes the 1st half stoppage mark
+			additional = 1.5	
+	if start == -2:
+		start = 45.0 #want to use 45 so that the calculation below accounts for min 46 as you step into the second half
+
+	if end == -2:
+		end = 45.0 + 1.5 #avg of 97 seconds of 1st half stoppage
+	elif end == -1:
+		end = 90.0 + 4.0 #avg of 238 seconds of 2nd half stoppage
+
+	return end - start 
+		
 
 def aggregate_statistic(game, primary_team, metric, gs_definer):
 		workable_metrics = ["time_on_pitch","minute","home_score","away_score","passes","passes_succ","passes_unsucc","passes_received","shots","shots_on_target","goals","offsides","dribbles","crosses","corners_taken","free_kicks_taken","fouls","fouled","yellow_cards","red_cards","tackles","tackled","blocks","interceptions","clearances","blocked_shots","shots_on_target_ex_blocked","shots_off_target_ex_blocked","shots_inside_box","shots_on_target_inside_box","shots_outside_box","shots_on_target_outside_box","goals_inside_box","goals_outside_box","entries_final_third","entries_pen_area","entries_pen_area_succ","entries_pen_area_unsucc","first_time_passes","first_time_passes_complete","first_time_passes_incomplete"]
@@ -308,17 +327,29 @@ class Command(BaseCommand):
 			raise Exception(str(db_team) + " has no statistics populated in the DB")
 
 		
-		# FOR EACH METRIC, by game (for which we have moments), aggregate the stats
+		# FOR EACH METRIC, by game (for which we have moments), aggregate the stats and STORE THEM in a structure of dictionaries and a list
+		sw_aggregated_stats = {}
 		for metric in arg_metrics:
+			sw_aggregated_stats[metric] = {}
+
 			print("\nMETRIC = " + str(metric))
 			for date in sorted(game_state_definer):
+				sw_aggregated_stats[metric][date] = []
+
 				game = games_and_dates[date]
 				
-				print("\n  GAME = " + str(game))
+				game_name = str(game)
 
 				agg_s = aggregate_statistic(game,db_team,metric,game_state_definer[date])
 
+				count = 0 #counter for timewindows per game
 				for item in agg_s:
-					print("\t" + str(item[0]) \
-						+ "\t" + str(item[1]) + "\t" + str(item[2]))
-				
+					row = [metric, str(date), game_name, count, item[0], time_window_length(item[0]), item[1], item[2]]
+					sw_aggregated_stats[metric][date].append(row)
+					count += 1
+		
+
+		for m in sw_aggregated_stats:
+			for d in sorted(sw_aggregated_stats[m]):
+				for row in sw_aggregated_stats[m][d]:
+					print(row)
