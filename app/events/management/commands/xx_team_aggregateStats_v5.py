@@ -230,6 +230,26 @@ class Command(BaseCommand):
             default=False,
             help="comma separated start and end dates",
             )
+		parser.add_argument(
+			"--tw_minimum_length",
+            dest="tw_minimum_length",
+            default=0.0,
+            help="minimum length of time windows to compute lifts for",
+            )
+		parser.add_argument(
+			"--tw_maximum_length",
+            dest="tw_maximum_length",
+            default=0.0,
+            help="maximum length of time windows to compute lifts for",
+            )
+		# add optional print to csv flag
+		parser.add_argument(
+			"--print_to_csv",
+			action="store_true",
+            dest="print_to_csv",
+            default=False,
+            help="save file?",
+            )
 	
 	def handle(self,*args,**options):
 		# Check to make sure the appropriate arguments are input
@@ -257,7 +277,6 @@ class Command(BaseCommand):
 
 		arg_metrics = options["metrics"].split(";")
 
-
 		arg_daterange = options["daterange"]
 		if arg_daterange:
 			arg_daterange = arg_daterange.split(";")
@@ -266,6 +285,16 @@ class Command(BaseCommand):
 
 			if arg_daterange[1] < arg_daterange[0]:
 				raise Exception("Wrong date order")
+
+		arg_tw_minimum_length = float(options["tw_minimum_length"])
+		if not arg_tw_minimum_length:
+			arg_tw_minimum_length = 0.0
+
+		arg_print_to_csv = options["print_to_csv"]
+		if arg_print_to_csv:
+			arg_print_to_csv = True
+		else:
+			arg_print_to_csv = False
 
 		# pull the team name
 		db_team = Team.objects.get(sw_id=arg_sw_id)
@@ -371,7 +400,7 @@ class Command(BaseCommand):
 						oldrow = row
 						continue
 
-					if row[5] < 0.1:
+					if row[5] < arg_tw_minimum_length:
 						time_window_too_short = True
 						continue
 
@@ -385,19 +414,18 @@ class Command(BaseCommand):
 
 						oldrow = row
 
+		if arg_print_to_csv:
+			os.chdir("/Users/Swoboda/Desktop/")
+			output_filename = "program_results__" + str(db_team) + "_" +   ".csv"
+			output = open(output_filename, "a")
+			writer = csv.writer(output, lineterminator="\n")
 
+			for m in sw_aggregated_stats:
+				for d in sorted(sw_aggregated_stats[m]):
+					for row in sw_aggregated_stats[m][d]:
+						writer.writerow(row)
 
-		os.chdir("/Users/Swoboda/Desktop/")
-		output_filename = "program_results__" + str(db_team) + "_" +   ".csv"
-		output = open(output_filename, "a")
-		writer = csv.writer(output, lineterminator="\n")
-
-		for m in sw_aggregated_stats:
-			for d in sorted(sw_aggregated_stats[m]):
-				for row in sw_aggregated_stats[m][d]:
-					writer.writerow(row)
-
-		output.close()
+			output.close()
 
 		np_calculated_lifts = np.array(calculated_lifts)
 
