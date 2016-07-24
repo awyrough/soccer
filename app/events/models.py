@@ -148,6 +148,9 @@ def _default_moment_value():
 	return models.IntegerField(default=0)
 
 class TimeEvent(models.Model):
+	FIRST_HALF_EXTRA_TIME = -1
+	SECOND_HALF_EXTRA_TIME = -2
+
 	team = models.ForeignKey(Team, on_delete=models.CASCADE)
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
 	
@@ -207,7 +210,7 @@ class TimeEvent(models.Model):
 	passes_successful_opphalf = _default_moment_value()
 
 	def _is_first_half_extra_time(self):
-		return self.minute == -2
+		return self.minute == FIRST_HALF_EXTRA_TIME
 
 	def _is_second_half_extra_time(self):
-		return self.minute == -1
+		return self.minute == SECOND_HALF_EXTRA_TIME
