@@ -11,7 +11,7 @@ def _include_first_half_stoppage(start, end):
     """
     # If you start in the first half and end in the second half
     # or beyond
-    if start <= 45 and (end > 45 or end == None):
+    if (start <= 45 or start == -1) and (end > 45 or end == None):
         return True
 
 def _include_second_half_stoppage(start, end):
@@ -20,7 +20,7 @@ def _include_second_half_stoppage(start, end):
     half stoppage time.
     """
     # You would only include if there is no end
-    return end > 90 or end == None
+    return end > 90 or end == None or end == -2
 
 def get_game_time_events(game, start_minute=None, end_minute=None):
     """
@@ -35,7 +35,7 @@ def get_game_time_events(game, start_minute=None, end_minute=None):
         queryset = queryset.exclude(
             minute=TimeEvent.SECOND_HALF_EXTRA_TIME)
     if start_minute != None:
-        queryset = queryset.filter(minute__gt=start_minute)
+        queryset = queryset.filter(minute__gte=start_minute)
     if end_minute != None:
         queryset = queryset.filter(minute__lte=end_minute)
     # AJ Edit -- not sure why you included a pass, as I believe we need to return the queryset we're creating?
@@ -49,13 +49,18 @@ def get_game_statistic_events(game):
     """
     return StatisticEvent.objects.filter(game=game)
 
-def get_game_stats_by_action(game, action):
+def get_game_stats_by_action_and_team(team, game, action, identifier):
     """
-    Return all statistics from a given game and action.
+    Return all statistics from a given game and action. Changes depending on Both, Self, Oppo relative to team
     """
-    return get_game_statistic_events(game).filter(action=action)
+    if identifier == "Both":
+        return get_game_statistic_events(game).filter(action=action)
+    if identifier == "Self":
+        return get_game_statistic_events(game).filter(action=action, action_team=team)
+    if identifier == "Oppo":
+        return get_game_statistic_events(game).filter(action=action).exclude(action_team = team)
 
-def create_windows_for_game_action(game, action):
+def create_windows_for_game(team, game, action, identifier):
     """
     Return list of tuples as [start, end] of all the windows
     in a game.
@@ -64,7 +69,7 @@ def create_windows_for_game_action(game, action):
     If the last action is before the end of the game, the final
     window should be until the end of the game, including stoppage.
     """
-    actions = get_game_stats_by_action(game, action) \
+    actions = get_game_stats_by_action_and_team(team, game, action, identifier) \
         .order_by("half", "seconds")
     if actions.count() == 0:
         return [[0, -2], ]
@@ -75,12 +80,25 @@ def create_windows_for_game_action(game, action):
         end = action.get_minute_ceiling()
         window = [start, end]
         windows.append(window)
-        start = end
+        start = end + 1 #+ 1 because we're doing inclusive
         last_action = action
     if last_action.get_minute_ceiling() != -2:
         windows.append([start, -2])
     return windows
 
+def time_window_length(tuple):
+    """
+    Input a time window tuple and output a time length in minutes.
+    Use 2015 Season Avgs for 1st half and 2nd half stoppage lengths
+    """
+    start = tuple[0]
+    end = tuple[1]
+    additional = 0.0
+    if _include_first_half_stoppage(start, end):
+        additional += 1.5
+    if _include_second_half_stoppage(start, end):
+        additional += 4.0
+    return end - start + additional + 1 #plus 1 because we're saying start / end are both inclusive
 
 
 

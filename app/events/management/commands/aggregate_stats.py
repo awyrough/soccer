@@ -18,27 +18,9 @@ from django.core.management.base import BaseCommand, CommandError
 from games.models import *
 from events.models import *
 
-import sw_time
+from events.utils.sw_time import create_windows_for_game
 
-def time_window_length(time_window_list):
-	start = time_window_list[0]
-	end = time_window_list[1]
-
-	additional = 0.0
-
-	if ((start != -2) and (start < 46)) and end >= 46: # if the TW passes the 1st half stoppage mark
-			additional = 1.5	
-	if start == -2:
-		start = 45.0 #want to use 45 so that the calculation below accounts for min 46 as you step into the second half
-
-	if end == -2:
-		end = 45.0 + 1.5 #avg of 97 seconds of 1st half stoppage
-	elif end == -1:
-		end = 90.0 + 4.0 #avg of 238 seconds of 2nd half stoppage
-
-	return end - start 
 		
-
 def aggregate_statistic(game, primary_team, metric, gs_definer):
 		workable_metrics = ["time_on_pitch","minute","home_score","away_score","passes","passes_succ","passes_unsucc","passes_received","shots","shots_on_target","goals","offsides","dribbles","crosses","corners_taken","free_kicks_taken","fouls","fouled","yellow_cards","red_cards","tackles","tackled","blocks","interceptions","clearances","blocked_shots","shots_on_target_ex_blocked","shots_off_target_ex_blocked","shots_inside_box","shots_on_target_inside_box","shots_outside_box","shots_on_target_outside_box","goals_inside_box","goals_outside_box","entries_final_third","entries_pen_area","entries_pen_area_succ","entries_pen_area_unsucc","first_time_passes","first_time_passes_complete","first_time_passes_incomplete"]
 
@@ -216,10 +198,10 @@ class Command(BaseCommand):
 			help="sw_id to identify team on which to analyze",
 			)
 		parser.add_argument(
-			"--moment_definer",
-			dest="moment_definer",
+			"--moment",
+			dest="moment",
 			default="",
-			help="EventAction,TeamIdentifier pairings to determine what moments to pull; TeamIdentifier = Self,Oppo,Both",
+			help="EventAction,TeamIdentifier pairing to determine what moments to pull; TeamIdentifier = Self,Oppo,Both",
 			)
 		parser.add_argument(
 			"--metrics",
@@ -259,7 +241,7 @@ class Command(BaseCommand):
 		if not options["sw_id"]:
 			raise Exception("A sw_id is required for analysis")
 
-		if not options["moment_definer"]:
+		if not options["moment"]:
 			raise Exception("Please explain how to define moments; format of 'EventAction,TeamIdentifier;' please; TeamIdentifier = Self,Oppo,Both")
 
 		if not options["metrics"]:
@@ -268,15 +250,14 @@ class Command(BaseCommand):
 		# save the inputs as variables
 		arg_sw_id = options["sw_id"]
 		
-		arg_moment_definer = {}
-		x = options["moment_definer"].split(";")
-		for item in x:
-			i = item.split(",")
-			if len(i) != 2:
-				raise Exception("The moment definer has a weird combination of inputs")
-			if i[1] not in ["Self", "Oppo", "Both"]:
-				raise Exception("Unknown team identifier: " + str(i[1]) + "\nShould be either Self, Oppo, Both")
-			arg_moment_definer[i[0]] = i[1]
+
+		x = options["moment"]
+		arg_moment_definer = x.split(",")
+		if len(arg_moment_definer) != 2:
+			raise Exception("The moment definer has a weird combination of inputs")
+		if arg_moment_definer[1] not in ["Self", "Oppo", "Both"]:
+			raise Exception("Unknown team identifier: " + str(arg_moment_definer[1]) + "\nShould be either Self, Oppo, Both")
+
 
 		arg_metrics = options["metrics"].split(";")
 
@@ -313,6 +294,14 @@ class Command(BaseCommand):
 
 		# find if there are games with populated stats
 		no_games = True
+
+
+		# pull time windows
+		windows = create_windows_for_game(db_team, db_team_games, arg_moment_definer[0], arg_moment_definer[1])
+
+		print(windows)
+
+		raise Exception("MADE IT SO FAR")
 
 		# game state definer = dictionary with key = dates (of games), value = moment list [(min,action team + action),...]
 		game_state_definer = {}
