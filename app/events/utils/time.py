@@ -24,7 +24,7 @@ def _include_second_half_stoppage(start, end):
 
 def get_game_time_events(game, start_minute=None, end_minute=None):
     """
-    Return the minute events in a game that begin with start minute
+    Return the time events in a game that begin with start minute
     and end with end minute, inclusive.
     """
     queryset = get_game_time_events(game) 
@@ -35,10 +35,13 @@ def get_game_time_events(game, start_minute=None, end_minute=None):
         queryset = queryset.exclude(
             minute=TimeEvent.SECOND_HALF_EXTRA_TIME)
     if start_minute != None:
-        queryset = queryset.filter(minute__gte=start_minute)
+        queryset = queryset.filter(minute__gt=start_minute)
     if end_minute != None:
-        queryset = queryset.filter(minute_lte=end_minute)
-    pass
+        queryset = queryset.filter(minute__lte=end_minute)
+    # AJ Edit -- not sure why you included a pass, as I believe we need to return the queryset we're creating?
+    #pass
+
+    return queryset
 
 def get_game_statistic_events(game):
     """
@@ -69,12 +72,12 @@ def create_windows_for_game_action(game, action):
     start = 0
     last_action = None
     for action in actions:
-        end = action.get_minute_exact()
+        end = action.get_minute_ceiling()
         window = [start, end]
         windows.append(window)
         start = end
         last_action = action
-    if last_action.get_minute_exact() < 90.0:
+    if last_action.get_minute_ceiling() != -2:
         windows.append([start, -2])
     return windows
 

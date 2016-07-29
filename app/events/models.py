@@ -1,3 +1,5 @@
+import math
+
 from __future__ import unicode_literals
 
 from django.db import models
@@ -58,6 +60,28 @@ class GameEvent(models.Model):
 			minutes = self.EXTRA_TIME_START_MINUTE + minutes
 		return minutes
 
+	def get_minute_ceiling(self):
+ 	    """
+    	Return ceiling of minute of action (as reported in box stats) from a given event.
+
+    	If stoppage time, report -1 for 1st half or -2 for second half
+    	"""
+		minutes = self.seconds / 60.0
+		if (self.half == 1):
+			if minutes > 45.0:
+				minutes = -1
+			else:
+				minutes = math.ceil(minutes)
+		elif (self.half == 2):
+			if minutes > 90.0:
+				minutes = -2
+			else:
+				minutes = math.ceil(minutes)
+		else:
+			raise Exception("This Event has no half associated with it?")
+
+		return minutes
+		
 class StatisticEvent(GameEvent):
 	ACTIONS = (
 		("BLOCK", "Block"),
