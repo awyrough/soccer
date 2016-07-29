@@ -75,6 +75,7 @@ class GameEvent(models.Model):
 				# as long as we're a full second into next minute, round up
 				if self.seconds - minutes*60 >= 1:
 					minutes += 1 
+				minutes = float(minutes)
 		elif self.half == 2:
 			minutes += 45
 			if minutes > 90.0:

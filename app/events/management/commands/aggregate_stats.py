@@ -18,7 +18,7 @@ from django.core.management.base import BaseCommand, CommandError
 from games.models import *
 from events.models import *
 
-from events.utils.sw_time import create_windows_for_game
+from events.utils.sw_time import *
 
 		
 def aggregate_statistic(game, primary_team, metric, gs_definer):
@@ -209,6 +209,9 @@ class Command(BaseCommand):
 			default="",
 			help="List of metrics to pull",
 			)
+
+		print("Change to just pull 1 metric. Can add complexity later")
+
 		parser.add_argument(
 			"--daterange",
             dest="daterange",
@@ -302,6 +305,29 @@ class Command(BaseCommand):
 		print(windows)
 
 		raise Exception("MADE IT SO FAR")
+
+
+		"""
+		pull team games (replace lines 288 - 290)
+		--> sw_games.py
+
+		pull meta information of each game State
+			- use same logic as time windows but create list of action + action team?
+			- write another method using same logic that calculates aggregate score?
+			- ANOTHER that calculates goal_differential?
+		--> sw_time.py which should be called sw_event_stats.py
+
+		write method that aggregates TimeStatistic over time window input
+		--> sw_time_stats.py
+			export = dict[game]-[list for tw's]
+
+		method for taking aggregated time stats 
+		"""
+
+
+
+
+
 
 		# game state definer = dictionary with key = dates (of games), value = moment list [(min,action team + action),...]
 		game_state_definer = {}
