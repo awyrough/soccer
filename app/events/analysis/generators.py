@@ -1,4 +1,5 @@
-def create_artificial_windows_by_fn(step_fn, start=0, end=90):
+def create_artificial_windows_by_fn(
+		step_fn, start=0, end=90, inc=1):
 	"""
 	Create artificial windows based on some functions.
 
@@ -13,9 +14,9 @@ def create_artificial_windows_by_fn(step_fn, start=0, end=90):
 	assert start <= end, "end can't be before start"
 	windows = []
 	time = start
-	while start < end:
+	while start <= end:
 		next = step_fn(start)
 		window = [start, next if next < end else end]
 		windows.append(window)
-		start = next
+		start = next + inc
 	return windows
