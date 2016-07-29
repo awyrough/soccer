@@ -1,7 +1,7 @@
 from events.models import StatisticEvent, TimeEvent
 from games.models import Game
 
-def get_game_time_events(game):
+def get_game_events(game):
     return TimeEvent.objects.filter(game=game).order_by("minute")
 
 def _include_first_half_stoppage(start, end):
@@ -27,7 +27,7 @@ def get_game_time_events(game, start_minute=None, end_minute=None):
     Return the minute events in a game that begin with start minute
     and end with end minute, inclusive.
     """
-    queryset = get_game_time_events(game) 
+    queryset = get_game_events(game) 
     if (not _include_first_half_stoppage(start_minute, end_minute)):
         queryset = queryset.exclude(
             minute=TimeEvent.FIRST_HALF_EXTRA_TIME)
@@ -37,8 +37,17 @@ def get_game_time_events(game, start_minute=None, end_minute=None):
     if start_minute != None:
         queryset = queryset.filter(minute__gte=start_minute)
     if end_minute != None:
-        queryset = queryset.filter(minute_lte=end_minute)
-    pass
+        queryset = queryset.filter(minute__lte=end_minute)
+    return queryset
+
+def get_game_time_events_for_team(
+    game, team, start_minute=None, end_minute=None):
+    """
+    Return the minute events by team.
+    """
+    return get_game_time_events(
+        game, start_minute=start_minute, end_minute=end_minute) \
+            .filter(team=team)
 
 def get_game_statistic_events(game):
     """
@@ -64,7 +73,7 @@ def create_windows_for_game_action(game, action):
     actions = get_game_stats_by_action(game, action) \
         .order_by("half", "seconds")
     if actions.count() == 0:
-        return [[0, -2], ]
+        return [[0, StatisticEvent.SECOND_HALF_EXTRA_TIME], ]
     windows = []
     start = 0
     last_action = None
@@ -75,7 +84,7 @@ def create_windows_for_game_action(game, action):
         start = end
         last_action = action
     if last_action.get_minute_exact() < 90.0:
-        windows.append([start, -2])
+        windows.append([start, StatisticEvent.SECOND_HALF_EXTRA_TIME])
     return windows
 
 

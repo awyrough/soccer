@@ -119,31 +119,6 @@ class StatisticEvent(GameEvent):
 		# TODO(hillwyrough): define unique together
 		pass
 
-class Goal(GameEvent):
-	"""
-	Intended fields:
-		- Player/Scorer
-	NB: This should **not** have information about the goal itself.
-	"""
-	pass
-
-class Substitution(GameEvent):
-	"""
-	Intended fields:
-		- player_on
-		- player_off
-		- reason (tactical/injury)
-	"""
-	pass
-
-class DisciplinaryAction(GameEvent):
-	"""
-	Intended fields:
-		- player
-		- type (red/yellow)
-	"""
-	pass
-
 def _default_moment_value():
 	return models.IntegerField(default=0)
 
@@ -214,3 +189,6 @@ class TimeEvent(models.Model):
 
 	def _is_second_half_extra_time(self):
 		return self.minute == SECOND_HALF_EXTRA_TIME
+
+	def __str__(self):
+		return "%s' <%s:%s>" % (self.minute, self.game, self.team)
