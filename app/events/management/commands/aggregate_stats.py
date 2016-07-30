@@ -13,12 +13,7 @@
 #
 # OUTPUT: aggregated stats for the games
 
-import math
 import datetime
-import os
-import csv
-import numpy as np
-from scipy.stats import ttest_1samp, wilcoxon, ttest_ind, mannwhitneyu
 
 from django.core.management.base import BaseCommand, CommandError
 from games.models import *
