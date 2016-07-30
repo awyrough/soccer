@@ -107,9 +107,9 @@ class Command(BaseCommand):
 
             time_on_pitch = float(event[3])
             if event[4] == "90 +":
-                minute = -1
-            elif event[4] == "45 +":
                 minute = -2
+            elif event[4] == "45 +":
+                minute = -1
             else:
                 minute = int(event[4])
             

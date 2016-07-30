@@ -1,21 +1,24 @@
 from events.models import StatisticEvent, TimeEvent
 from games.models import Game
 
+from django.db.models import Q
 
 def _include_first_half_stoppage(start, end):
     """
-    Return true if the start and end times span the first half
-    stoppage time.
+    Return true if the window spans the first half stoppage time.
     """
     # If you start in the first half and end in the second half
     # or beyond
-    if (start <= 45 or start == -1) and (end > 45 or end == None):
+    if (0 <= start <= 45) and (end > 45 or end == -2 or end == None):
         return True
+    if (end == -1):
+        return True
+    if (start == -1):
+        return False
 
 def _include_second_half_stoppage(start, end):
     """
-    Return true if the start and end times span the second
-    half stoppage time.
+    Return true if the window spans the second half stoppage time.
     """
     # You would only include if there is no end
     return end > 90 or end == None or end == -2
@@ -27,18 +30,39 @@ def get_game_time_events_window(game, start_minute=None, end_minute=None):
     """
     Return the time events in a game that begin with start minute
     and end with end minute, inclusive.
+
+    AJ 7/30: We couldn't do the simple gt and lte logic because of cases where we'd 
+    either kick out stoppage times or have a start/end be a stoppage time
     """
     queryset = get_game_time_events(game) 
+
+    #Handle cases where start min could be a stoppage time; always include stoppage timeEvents
+    if start_minute == -2:
+        raise Exception("The start of a time window shouldn't be second half stoppage")
+    elif start_minute == -1:
+        approx_start = 45.1
+        queryset = queryset.filter(Q(minute__gt=approx_start) | Q(minute__lt=0))
+    elif start_minute >= 0:
+        queryset = queryset.filter(Q(minute__gt=start_minute) | Q(minute__lt=0))
+
+    #Handle cases where end min could be a stoppage time; always include stoppage timeEvents
+    if end_minute == -1:
+        approx_end = 45.1
+        queryset = queryset.filter(Q(minute__lte=approx_end) | Q(minute__lt=0))
+    elif end_minute == -2:
+        approx_end = 90.1
+        queryset = queryset.filter(Q(minute__lte=approx_end)) 
+    elif end_minute >= 0:
+        queryset = queryset.filter(Q(minute__lte=end_minute) | Q(minute__lt=0))
+    
+    # NOW decide whether or not to kick out stoppage events
     if (not _include_first_half_stoppage(start_minute, end_minute)):
         queryset = queryset.exclude(
             minute=TimeEvent.FIRST_HALF_EXTRA_TIME)
     if (not _include_second_half_stoppage(start_minute, end_minute)):
         queryset = queryset.exclude(
             minute=TimeEvent.SECOND_HALF_EXTRA_TIME)
-    if start_minute != None:
-        queryset = queryset.filter(minute__gt=start_minute)
-    if end_minute != None:
-        queryset = queryset.filter(minute__lte=end_minute)
+
     return queryset
 
 def get_game_time_events_for_team(
@@ -151,6 +175,13 @@ def time_window_length(tuple):
         additional += 1.5
     if _include_second_half_stoppage(start, end):
         additional += 4.0
+    if start == -1:
+        start = 45
+    if end == -1:
+        end = 45
+    elif end == -2:
+        end = 90
+
     return end - start + additional #we're saying start is exclusive end are both inclusive
 
 
