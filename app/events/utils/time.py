@@ -59,13 +59,13 @@ def get_game_stats_by_action_and_team(team, game, action, identifier):
     """
     Return all statistics from a given game and action. Changes depending on Both, Self, Oppo relative to team
     """
-    if identifier == "Both":
-        return get_game_statistic_events(game).filter(action=action)
     if identifier == "Self":
         return get_game_statistic_events(game).filter(action=action, action_team=team)
-    if identifier == "Oppo":
+    elif identifier == "Oppo":
         return get_game_statistic_events(game).filter(action=action).exclude(action_team = team)
-
+    else:
+        return get_game_statistic_events(game).filter(action=action)
+        
 def create_windows_for_game(team, game, action, identifier):
     """
     Return list of tuples as [start, end] of all the windows
