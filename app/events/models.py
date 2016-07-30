@@ -4,6 +4,8 @@ from django.db import models
 
 from games.models import Game, Team
 
+import math
+
 class GameEvent(models.Model):
 	"""
 	Abstract class for game events.
@@ -56,6 +58,37 @@ class GameEvent(models.Model):
 			minutes =  self.SECOND_HALF_START_MINUTE + minutes
 		if (self.half == 3):
 			minutes = self.EXTRA_TIME_START_MINUTE + minutes
+		return minutes
+
+	def get_minute_ceiling(self):
+		"""
+		Return ceiling of minute of action (as reported in box stats) from a given event.
+				If there is less than 1 second of action into a new minute, don't round up
+		    	If stoppage time, report -1 for 1st half or -2 for second half
+		"""
+		minutes = self.seconds / 60.0 #get approx minute
+		if self.half == 1:
+			if minutes > 45.0:
+				minutes = -1
+			else:
+				minutes = int(self.seconds) / 60
+				# as long as we're a full second into next minute, round up
+				if self.seconds - minutes*60 >= 1:
+					minutes += 1 
+				minutes = float(minutes)
+		elif self.half == 2:
+			minutes += 45
+			if minutes > 90.0:
+				minutes = -2
+			else:
+				minutes = int(self.seconds) / 60
+				# as long as we're a full second into next minute, round up
+				if self.seconds - minutes*60 >= 1:
+					minutes += 1
+				# account for second half
+				minutes += 45.0 
+		else: # (self.half != 1) or (self.half != 2):
+			raise Exception("This Event has no half associated with it?")
 		return minutes
 
 class StatisticEvent(GameEvent):
