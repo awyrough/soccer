@@ -145,26 +145,22 @@ class Command(BaseCommand):
 		for game in games:
 			time_windows[game] = create_windows_for_game(arg_team, game, arg_moment, arg_moment_team)
 			meta_info[game] = create_window_meta_information_for_game(arg_team, game, arg_moment, arg_moment_team)
-			agg_tally_moments[game] = create_window_aggregate_action_counts_for_game(arg_team, game, arg_moment, arg_moment_team)
+			agg_tally_moments[game] = create_window_tally_action_counts_for_game(arg_team, game, arg_moment, arg_moment_team)
 
 		"""
 		4) Aggregate metric over time windows
 		"""
 		agg_stats = {}
 		for game in games:
-			agg_stats[game] = do_collect_and_aggregate(arg_team, game, \
-					windows=time_windows[game], meta_info=meta_info[game], \
-					agg_tally_moments=agg_tally_moments[game])
-
-
+			agg_stats[game] = do_collect_and_aggregate(arg_team, game \
+					,windows=time_windows[game], meta_info=meta_info[game] \
+					,agg_tally_moments=agg_tally_moments[game])
 
 		"""
 		5) Calculate Lifts
 		"""
 
 		lifts, agg_stats = calculate_lift(games, agg_stats, arg_tw_min_length)
-
-
 		for game in games:
 			print("\n" + str(game))
 			for item in agg_stats[game]:
@@ -172,9 +168,7 @@ class Command(BaseCommand):
 
 		print("\n \n \n \n")
 		print(lifts)
-
 		print("\n \n \n \n")
-
 
 		"""
 		6) Calculate Statistical Significance

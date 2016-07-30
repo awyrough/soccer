@@ -141,7 +141,7 @@ def create_window_meta_information_for_game(team, game, action, identifier):
             + " > " + str(last_action.action)]
     return meta_info
 
-def create_window_aggregate_action_counts_for_game(team, game, action, identifier):
+def create_window_tally_action_counts_for_game(team, game, action, identifier):
     """
     Return list of aggregate counts (i.e. relative game states) describing the start of each window
     in a game.

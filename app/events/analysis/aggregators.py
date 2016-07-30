@@ -2,6 +2,7 @@ from events.utils.time_and_statistic import *
 
 # Define the 'metric' here
 PASSES = lambda x: x.passes
+GOALS = lambda x: x.goals
 PASS_ACCURACY = lambda x: x.passes_unsucc / x.passes
 
 # Define the 'aggregation' here (average, median, total)
