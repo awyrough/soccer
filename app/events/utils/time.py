@@ -35,7 +35,7 @@ def get_game_time_events(game, start_minute=None, end_minute=None):
         queryset = queryset.exclude(
             minute=TimeEvent.SECOND_HALF_EXTRA_TIME)
     if start_minute != None:
-        queryset = queryset.filter(minute__gte=start_minute)
+        queryset = queryset.filter(minute__gt=start_minute)
     if end_minute != None:
         queryset = queryset.filter(minute__lte=end_minute)
     return queryset
@@ -86,7 +86,7 @@ def create_windows_for_game(team, game, action, identifier):
         end = action.get_minute_ceiling()
         window = [start, end]
         windows.append(window)
-        start = end + 1 #+ 1 because we're doing inclusive
+        start = end # remember the start of window is exclusive
         last_action = action
     if last_action.get_minute_ceiling() != -2:
         windows.append([start, StatisticEvent.SECOND_HALF_EXTRA_TIME])
@@ -104,7 +104,7 @@ def time_window_length(tuple):
         additional += 1.5
     if _include_second_half_stoppage(start, end):
         additional += 4.0
-    return end - start + additional + 1 #plus 1 because we're saying start / end are both inclusive
+    return end - start + additional #we're saying start is exclusive end are both inclusive
 
 
 

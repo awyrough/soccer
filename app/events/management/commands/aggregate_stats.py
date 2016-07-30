@@ -204,10 +204,10 @@ class Command(BaseCommand):
 			help="EventAction,TeamIdentifier pairing to determine what moments to pull; TeamIdentifier = Self,Oppo,Both",
 			)
 		parser.add_argument(
-			"--metrics",
-			dest="metrics",
+			"--metric",
+			dest="metric",
 			default="",
-			help="List of metrics to pull",
+			help="Identify which metric to pull",
 			)
 
 		print("Change to just pull 1 metric. Can add complexity later")
@@ -247,8 +247,8 @@ class Command(BaseCommand):
 		if not options["moment"]:
 			raise Exception("Please explain how to define moments; format of 'EventAction,TeamIdentifier;' please; TeamIdentifier = Self,Oppo,Both")
 
-		if not options["metrics"]:
-			raise Exception("We need metrics to aggregate; comma separated format please")
+		if not options["metric"]:
+			raise Exception("We need a metric to aggregate")
 
 		# save the inputs as variables
 		arg_sw_id = options["sw_id"]
@@ -262,7 +262,7 @@ class Command(BaseCommand):
 			raise Exception("Unknown team identifier: " + str(arg_moment_definer[1]) + "\nShould be either Self, Oppo, Both")
 
 
-		arg_metrics = options["metrics"].split(";")
+		arg_metric = options["metric"]
 
 		arg_daterange = options["daterange"]
 		if arg_daterange:
@@ -300,7 +300,13 @@ class Command(BaseCommand):
 
 
 		# pull time windows
-		windows = create_windows_for_game(db_team, db_team_games, arg_moment_definer[0], arg_moment_definer[1])
+		sw_time_windows = {}
+		for game in db_team_games:
+			sw_time_windows[game] = create_windows_for_game(db_team, game, arg_moment_definer[0], arg_moment_definer[1])
+
+		for game in sorted(sw_time_windows):
+			print(game)
+			print(sw_time_windows[game])
 
 		print(windows)
 
