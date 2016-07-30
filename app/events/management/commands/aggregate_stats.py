@@ -18,7 +18,7 @@ from django.core.management.base import BaseCommand, CommandError
 from games.models import *
 from events.models import *
 
-from events.utils.time import *
+from events.utils.time_and_statistic import *
 from events.utils.team import *
 
 class Command(BaseCommand):
@@ -140,9 +140,17 @@ class Command(BaseCommand):
 
 		# pull time windows
 		time_windows = {}
+		meta_info = {}
+		agg_moments = {}
 		for game in games:
 			time_windows[game] = create_windows_for_game(arg_team, game, arg_moment, arg_team)
+			meta_info[game] = create_window_meta_information_for_game(arg_team, game, arg_moment, arg_team)
+			agg_moments[game] = create_window_aggregate_action_counts_for_game(arg_team, game, arg_moment, arg_team)
+			print(game)
 			print(time_windows[game])
+			print(meta_info[game])
+			print(agg_moments[game])
+			print("")
 
 
 		raise Exception("MADE IT SO FAR")

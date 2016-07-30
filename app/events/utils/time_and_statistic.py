@@ -1,8 +1,6 @@
 from events.models import StatisticEvent, TimeEvent
 from games.models import Game
 
-def get_game_events(game):
-    return TimeEvent.objects.filter(game=game).order_by("minute")
 
 def _include_first_half_stoppage(start, end):
     """
@@ -22,12 +20,15 @@ def _include_second_half_stoppage(start, end):
     # You would only include if there is no end
     return end > 90 or end == None or end == -2
 
-def get_game_time_events(game, start_minute=None, end_minute=None):
+def get_game_time_events(game):
+    return TimeEvent.objects.filter(game=game).order_by("minute")
+
+def get_game_time_events_window(game, start_minute=None, end_minute=None):
     """
     Return the time events in a game that begin with start minute
     and end with end minute, inclusive.
     """
-    queryset = get_game_events(game) 
+    queryset = get_game_time_events(game) 
     if (not _include_first_half_stoppage(start_minute, end_minute)):
         queryset = queryset.exclude(
             minute=TimeEvent.FIRST_HALF_EXTRA_TIME)
@@ -45,7 +46,7 @@ def get_game_time_events_for_team(
     """
     Return the minute events by team.
     """
-    return get_game_time_events(
+    return get_game_time_events_window(
         game, start_minute=start_minute, end_minute=end_minute) \
             .filter(team=team)
 
@@ -55,7 +56,7 @@ def get_game_statistic_events(game):
     """
     return StatisticEvent.objects.filter(game=game)
 
-def get_game_stats_by_action_and_team(team, game, action, identifier):
+def get_game_statistic_events_by_action_and_team(team, game, action, identifier):
     """
     Return all statistics from a given game and action. Changes depending on Both, Self, Oppo relative to team
     """
@@ -75,7 +76,7 @@ def create_windows_for_game(team, game, action, identifier):
     If the last action is before the end of the game, the final
     window should be until the end of the game, including stoppage.
     """
-    actions = get_game_stats_by_action_and_team(team, game, action, identifier) \
+    actions = get_game_statistic_events_by_action_and_team(team, game, action, identifier) \
         .order_by("half", "seconds")
     if actions.count() == 0:
         return [[0, StatisticEvent.SECOND_HALF_EXTRA_TIME], ]
@@ -91,6 +92,52 @@ def create_windows_for_game(team, game, action, identifier):
     if last_action.get_minute_ceiling() != -2:
         windows.append([start, StatisticEvent.SECOND_HALF_EXTRA_TIME])
     return windows
+
+def create_window_meta_information_for_game(team, game, action, identifier):
+    """
+    Return list of meta information describing the start of each window
+    in a game.
+
+    If there are no actions, it returns a full window that says "No Moments"
+    If the last action is before the end of the game, the final
+    window should be until the end of the game, including stoppage.
+    """
+    actions = get_game_statistic_events_by_action_and_team(team, game, action, identifier) \
+        .order_by("half", "seconds")
+    if actions.count() == 0:
+        return ["No Moments Found"]
+    meta_info = []
+    meta_info.append("Game Start")
+    last_action = None
+    for action in actions:
+        meta_info.append(str(action.action_team) + " > " + str(action.action))
+        last_action = action
+    if (last_action.get_minute_ceiling() == -2) and (len(actions) == 1):
+        meta_info = ["Game Start; End with stoppage time" + str(last_action.action_team) \
+            + " > " + str(last_action.action)]
+    return meta_info
+
+def create_window_aggregate_action_counts_for_game(team, game, action, identifier):
+    """
+    Return list of aggregate counts (i.e. relative game states) describing the start of each window
+    in a game.
+
+    If there are no actions, it returns a list with one "0" value
+    """
+    actions = get_game_statistic_events_by_action_and_team(team, game, action, identifier) \
+        .order_by("half", "seconds")
+    action_count = 0
+    if actions.count() == 0:
+        return [action_count]
+    action_count_history = []
+    action_count_history.append(action_count)
+    for action in actions:
+        if action.action_team == team:
+            action_count += 1
+        else:
+            action_count += -1
+        action_count_history.append(action_count)
+    return action_count_history
 
 def time_window_length(tuple):
     """
