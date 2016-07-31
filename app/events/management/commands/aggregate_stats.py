@@ -54,6 +54,12 @@ class Command(BaseCommand):
 			help="Identify which metric to pull",
 			)
 		parser.add_argument(
+			"--time_type",
+			dest="time_type",
+			default="",
+			help="Time Type of Lift Calculation: Total, Per Min",
+			)		
+		parser.add_argument(
 			"--daterange",
             dest="daterange",
             default=False,
@@ -93,6 +99,8 @@ class Command(BaseCommand):
 			raise Exception("Do the moments apply to Self, Oppo, or Both?")
 		if not options["metric"]:
 			raise Exception("We need a metric to aggregate")
+		if not options["time_type"]:
+			raise Exception("We need a calculation time type: Total, Per Min")
 
 		# save the inputs as variables
 		arg_sw_id = options["sw_id"]
@@ -111,6 +119,7 @@ class Command(BaseCommand):
 
 			if arg_start_date > arg_end_date:
 				raise Exception("Wrong date order")
+		arg_time_type_code = get_time_type_code(options["time_type"])
 
 		arg_tw_min_length = float(options["tw_min_length"])
 		if not arg_tw_min_length:
@@ -151,16 +160,16 @@ class Command(BaseCommand):
 		4) Aggregate metric over time windows
 		"""
 		agg_stats = {}
+		met = metric_command(arg_metric)
 		for game in games:
 			agg_stats[game] = do_collect_and_aggregate(arg_team, game \
 					,windows=time_windows[game], meta_info=meta_info[game] \
-					,agg_tally_moments=agg_tally_moments[game])
+					,agg_tally_moments=agg_tally_moments[game], metric=met)
 
 		"""
 		5) Calculate Lifts
 		"""
-
-		lifts, agg_stats = calculate_lift(games, agg_stats, arg_tw_min_length)
+		lifts, agg_stats = calculate_lift(games, agg_stats, arg_time_type_code, arg_tw_min_length)
 		for game in games:
 			print("\n" + str(game))
 			for item in agg_stats[game]:
@@ -176,6 +185,8 @@ class Command(BaseCommand):
 
 		mean, t_stat, p_val = statistical_significance(lifts)
 
+		mean = round(mean, 5)
+
 		print "mean percentage lift = ", (mean*100)
-		print "statistical significance = ", ((1-p_val)*100)
+		print "statistical significance = ", ((1-p_val))
 	
