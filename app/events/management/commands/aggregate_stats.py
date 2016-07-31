@@ -66,14 +66,14 @@ class Command(BaseCommand):
             help="Comma separated start and end dates. Example: 2015-06-13,2015-07-05",
             )
 		parser.add_argument(
-			"--tw_min_length",
-            dest="tw_min_length",
+			"--min_tw",
+            dest="min_tw",
             default=0.0,
             help="minimum length of time windows to compute lifts for",
             )
 		parser.add_argument(
-			"--tw_max_length",
-            dest="tw_max_length",
+			"--max_tw",
+            dest="max_tw",
             default=0.0,
             help="maximum length of time windows to compute lifts for",
             )
@@ -121,13 +121,13 @@ class Command(BaseCommand):
 				raise Exception("Wrong date order")
 		arg_time_type_code = get_time_type_code(options["time_type"])
 
-		arg_tw_min_length = float(options["tw_min_length"])
-		if not arg_tw_min_length:
-			arg_tw_min_length = 0.0
+		arg_min_tw = float(options["min_tw"])
+		if not arg_min_tw:
+			arg_min_tw = 0.0
 
-		arg_tw_max_length = float(options["tw_max_length"])
-		if not arg_tw_max_length:
-			arg_tw_max_length = 100.0
+		arg_max_tw = float(options["max_tw"])
+		if not arg_max_tw:
+			arg_max_tw = 100.0
 
 		arg_print_to_csv = options["print_to_csv"]
 		if arg_print_to_csv:
@@ -169,24 +169,39 @@ class Command(BaseCommand):
 		"""
 		5) Calculate Lifts
 		"""
-		lifts, agg_stats = calculate_lift(games, agg_stats, arg_time_type_code, arg_tw_min_length)
+		lift_info, agg_stats = calculate_lift(games, agg_stats, arg_time_type_code, arg_min_tw)
 		for game in games:
 			print("\n" + str(game))
 			for item in agg_stats[game]:
 				print(agg_stats[game][item])
 
 		print("\n \n \n \n")
-		print(lifts)
+		for item in lift_info:
+			print item
 		print("\n \n \n \n")
 
 		"""
-		6) Calculate Statistical Significance
+		6) Calculate Outliers
+		"""
+		non_outliers, outliers = run_outlier_check(extract_only_first_values(lift_info))
+
+		print "outlier count = ", len(outliers)
+		print "outliers:"
+		for item in outliers:
+			print '%s, z-score = %s' % (item[0],item[1])
+		print("\n")
+
+		"""
+		7) Calculate Statistical Significance
 		"""
 
-		mean, t_stat, p_val = statistical_significance(lifts)
+		mean, t_stat, p_val = statistical_significance( \
+					extract_only_first_values(non_outliers))
 
 		mean = round(mean, 5)
 
 		print "mean percentage lift = ", (mean*100)
 		print "statistical significance = ", ((1-p_val))
+
+
 	
