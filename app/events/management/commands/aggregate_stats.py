@@ -183,7 +183,7 @@ class Command(BaseCommand):
 		"""
 		6) Calculate Outliers
 		"""
-		non_outliers, outliers = run_outlier_check(extract_only_first_values(lift_info))
+		non_outliers, outliers = run_outlier_check(lift_info)
 
 		print "outlier count = ", len(outliers)
 		print "outliers:"
@@ -195,8 +195,7 @@ class Command(BaseCommand):
 		7) Calculate Statistical Significance
 		"""
 
-		mean, t_stat, p_val = statistical_significance( \
-					extract_only_first_values(non_outliers))
+		mean, t_stat, p_val = statistical_significance(non_outliers)
 
 		mean = round(mean, 5)
 

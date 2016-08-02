@@ -59,16 +59,17 @@ def calculate_lift(games, agg_collection, time_type, min_time_window):
 
 	return calculated_lifts, agg_collection
 
-def extract_only_first_values(lift_array):
+def extract_only_indexed_values(lift_array, index):
 	x = []
 	for item in lift_array:
-		x.append(item[0])
+		x.append(item[index])
 	return x
 
-def statistical_significance(lifts, null_hypo = 0):
+def statistical_significance(lifts_tuple_list, null_hypo = 0):
 	"""
 	Method to input lifts and understand statistical significance of measurement	
 	"""
+	lifts = extract_only_indexed_values(lifts_tuple_list, 0)
 	lifts = np.array(lifts)
 	
 	mean = np.mean(lifts)
@@ -108,25 +109,28 @@ def is_outlier(points, thresh=3.5):
 
     return modified_z_score > thresh, modified_z_score
 
-def identify_outliers(points):
+def identify_outliers(points_tuple_list):
+	points = extract_only_indexed_values(points_tuple_list, 0)
+	dates = extract_only_indexed_values(points_tuple_list, 1)
+
 	outlier_bool, z_score = is_outlier(points)
 
 	if len(points) != len(outlier_bool):
 		raise Exception("Lists not the same lenghth")
 	
-	return zip(points, outlier_bool, z_score)
+	return zip(points, dates, outlier_bool, z_score)
 
-def run_outlier_check(points):
-	zipped = identify_outliers(points)
+def run_outlier_check(points_tuple_list):
+	zipped = identify_outliers(points_tuple_list)
 
 	outliers = []
 	non_outliers = []
 
 	for item in zipped:
-		if item[1] == False:
-			non_outliers.append((item[0], item[2]))
+		if item[2] == False:
+			non_outliers.append((item[0], item[1], item[3]))
 		else:
-			outliers.append((item[0], item[2]))
+			outliers.append((item[0], item[1], item[3]))
 		
 	if len(non_outliers) + len(outliers) != len(zipped):
 		raise Exception("Lost data points")
