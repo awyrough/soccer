@@ -176,26 +176,51 @@ class Command(BaseCommand):
 				print(agg_stats[game][item])
 
 		print("\n \n \n \n")
-		for item in lift_info:
-			print item
-		print("\n \n \n \n")
+		# for item in lift_info:
+		# 	print item
+		# print("\n \n \n \n")
 
 		"""
 		6) Calculate Outliers
 		"""
 		non_outliers, outliers = run_outlier_check(lift_info)
 
+		# for item in non_outliers:
+		# 	print item[0]
+		# for item in non_outliers:
+		# 	print item[1]
+
+		# for item in outliers:
+		# 	print item[0]
+		# for item in outliers:
+		# 	print item[1]
+			
+
 		print "outlier count = ", len(outliers)
 		print "outliers:"
 		for item in outliers:
-			print '%s, z-score = %s' % (item[0],item[1])
+			print '%s, on %s. z-score = %s' % (item[0],item[1],item[2])
 		print("\n")
+
+		print "non_outlier count", len(non_outliers)
 
 		"""
 		7) Calculate Statistical Significance
 		"""
 
 		mean, t_stat, p_val = statistical_significance(non_outliers)
+
+		mean = round(mean, 5)
+
+		print "mean percentage lift = ", (mean*100)
+		print "statistical significance = ", ((1-p_val))
+
+
+		"""
+		8) No outliers
+		"""
+		print "No outliers below...... "
+		mean, t_stat, p_val = statistical_significance(lift_info)
 
 		mean = round(mean, 5)
 

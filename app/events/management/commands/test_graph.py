@@ -1,7 +1,5 @@
 import pylab
-import matplotlib as mil
-mil.use('TkAgg')
-import pyplot as plt
+import matplotlib.pyplot as plt
 from numpy.random import rand
 from datetime import datetime
 

@@ -77,7 +77,7 @@ def statistical_significance(lifts_tuple_list, null_hypo = 0):
 	
 	return mean, t_statistic, p_value
 
-def is_outlier(points, thresh=3.5):
+def is_outlier(points, thresh=4):
     """
     Returns a boolean array with True if points are outliers and False 
     otherwise.
