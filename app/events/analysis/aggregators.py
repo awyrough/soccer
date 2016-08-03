@@ -14,6 +14,9 @@ AVERAGE = lambda x: np.mean(x)
 DEFAULT_METRIC = PASSES
 DEFAULT_AGGREGATE = COUNT
 
+def pass_accuracy_improved(event):
+	return event.passes_unsucc / event.passes if event.passes > 0 else 0
+
 def metric_command(metric_string):
 	m_c = {}
 	m_c["passes"] = PASSES
@@ -33,8 +36,6 @@ def do_collect_and_aggregate(
 	like '0-5': 43 (i.e. there were 43 passes in 0-5 for this team
 		in this game)
 	"""
-	if metric in [PASS_ACCURACY]:
-		aggregate = AVERAGE
 	collection = {}
 	window_count = 0
 	for window in windows:
