@@ -54,6 +54,18 @@ class Command(BaseCommand):
 			help="Identify which metric to pull",
 			)
 		parser.add_argument(
+			"--metric_function_name",
+			dest="metric_function_name",
+			default="passes",
+			help="Identify which metric function to use on minute events (e.g. 'pass_accuracy')",
+			)
+		parser.add_argument(
+			"--aggregate_function_name",
+			dest="aggregate_function_name",
+			default="average",
+			help="Identify which aggregate function to use on collection of window metrics",
+			)
+		parser.add_argument(
 			"--time_type",
 			dest="time_type",
 			default="",
