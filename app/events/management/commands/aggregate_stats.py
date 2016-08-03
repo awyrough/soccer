@@ -21,6 +21,7 @@ from events.models import *
 
 from events.utils.time_and_statistic import *
 from events.utils.team import *
+from events.utils.graph import *
 from events.analysis.aggregators import *
 from events.analysis.statistics import *
 
@@ -53,18 +54,18 @@ class Command(BaseCommand):
 			default="",
 			help="Identify which metric to pull",
 			)
-		parser.add_argument(
-			"--metric_function_name",
-			dest="metric_function_name",
-			default="passes",
-			help="Identify which metric function to use on minute events (e.g. 'pass_accuracy')",
-			)
-		parser.add_argument(
-			"--aggregate_function_name",
-			dest="aggregate_function_name",
-			default="average",
-			help="Identify which aggregate function to use on collection of window metrics",
-			)
+		# parser.add_argument(
+		# 	"--metric_function_name",
+		# 	dest="metric_function_name",
+		# 	default="passes",
+		# 	help="Identify which metric function to use on minute events (e.g. 'pass_accuracy')",
+		# 	)
+		# parser.add_argument(
+		# 	"--aggregate_function_name",
+		# 	dest="aggregate_function_name",
+		# 	default="average",
+		# 	help="Identify which aggregate function to use on collection of window metrics",
+		# 	)
 		parser.add_argument(
 			"--time_type",
 			dest="time_type",
@@ -188,56 +189,49 @@ class Command(BaseCommand):
 				print(agg_stats[game][item])
 
 		print("\n \n \n \n")
-		# for item in lift_info:
-		# 	print item
-		# print("\n \n \n \n")
 
 		"""
-		6) Calculate Outliers
+		6) Calculate Outliers (Don't want to as of 8/3)
 		"""
-		non_outliers, outliers = run_outlier_check(lift_info)
+		# non_outliers, outliers = run_outlier_check(lift_info)
 
-		# for item in non_outliers:
-		# 	print item[0]
-		# for item in non_outliers:
-		# 	print item[1]
-
+		# print "outlier count = ", len(outliers)
+		# print "outliers:"
 		# for item in outliers:
-		# 	print item[0]
-		# for item in outliers:
-		# 	print item[1]
-			
+		# 	print '%s, on %s. z-score = %s' % (item[0],item[1],item[2])
+		# print("\n")
 
-		print "outlier count = ", len(outliers)
-		print "outliers:"
-		for item in outliers:
-			print '%s, on %s. z-score = %s' % (item[0],item[1],item[2])
-		print("\n")
-
-		print "non_outlier count", len(non_outliers)
+		# print "non_outlier count", len(non_outliers)
 
 		"""
 		7) Calculate Statistical Significance
 		"""
 
-		mean, t_stat, p_val = statistical_significance(non_outliers)
+		# mean, t_stat, p_val = statistical_significance(non_outliers)
 
-		mean = round(mean, 5)
+		# mean = round(mean, 5)
 
-		print "mean percentage lift = ", (mean*100)
-		print "statistical significance = ", ((1-p_val))
+		# print "mean percentage lift = ", (mean*100)
+		# print "statistical significance = ", ((1-p_val))
 
 
 		"""
-		8) No outliers
+		8) Calculate Statistical Significance (No outliers)
 		"""
-		print "No outliers below...... "
+		print "Time Window Minimum Limit of %s Mins " % (arg_min_tw)
+		print("\n \n \n \n")
+
 		mean, t_stat, p_val = statistical_significance(lift_info)
 
-		mean = round(mean, 5)
+		mean = round(mean, 8)
 
 		print "mean percentage lift = ", (mean*100)
 		print "statistical significance = ", ((1-p_val))
+		print("\n \n \n \n")
 
+		"""
+		9) Plot output as a scatter plot
+		"""
+		plot_scatterplot(lift_info)
 
 	
