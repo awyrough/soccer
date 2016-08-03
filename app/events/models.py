@@ -18,6 +18,9 @@ class GameEvent(models.Model):
 	EXTRA_TIME_START_MINUTE = 90.0
 	EXTRA_TIME_START_SECOND = 5400.0
 
+	FIRST_HALF_EXTRA_TIME = -1
+	SECOND_HALF_EXTRA_TIME = -2
+	
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
 	half = models.IntegerField(default=1, choices=((1,1), (2,2), (3,3)))
 	seconds = models.FloatField(default=0.0)
@@ -77,8 +80,7 @@ class GameEvent(models.Model):
 					minutes += 1 
 				minutes = float(minutes)
 		elif self.half == 2:
-			minutes += 45
-			if minutes > 90.0:
+			if minutes + 45 > 90.0:
 				minutes = -2
 			else:
 				minutes = int(self.seconds) / 60
