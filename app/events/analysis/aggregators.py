@@ -6,6 +6,35 @@ import numbers
 PASSES = lambda x: x.passes
 GOALS = lambda x: x.goals
 PASS_ACCURACY = lambda x: float(x.passes_succ) / float(x.passes) if x.passes > 0 else None
+# SHOTS = lambda x: x.shots
+# SHOTS_ON_TARGET = lambda x: x.shots_ot
+# SHOT_ACCURACY = lambda x: float(x.shots_ot) / float(x.shots) if x.shots > 0 else None
+# SHOTS_INSIDE_BOX = lambda x: x.shots_inside_box
+# SHOT_ACCURACY_INSIDE_BOX
+# SHOTS_OUTSIDE_BOX = lambda x: x.shots_outside_box
+# SHOT_ACCURACY_OUTSIDE_BOX
+# CORNERS = lambda x: x.corners
+# FREE_KICKS = lambda x: x.free_kicks_taken
+# PEN_AREA_ENTRIES = lambda x: x.entries_pen_area
+# PEN_AREA_ENTRY_ACCURACY 
+# FINAL_3RD_ENTRIES = lambda x: x.entries_final_3rd
+# PASSES_OWNHALF = lambda x: x.passes_attempted_ownhalf
+# PASSES_OPPHALF = lambda x: x.passes_attempted_opphalf
+# PASS_ACCURACY_OWNHALF
+# PASS_ACCURACY_OPPHALF
+# PASSES_FIRST_TIME = lambda x: x.first_time_passes
+# PASS_ACCURACY_FIRST_TIME
+# CLEARANCES = lambda x: x.clearances
+# INTERCEPTIONS = lambda x: x.interceptions
+# BLOCKS = lambda x: x.blocks
+# OFFSIDES = lambda x: x.offsides
+# DRIBBLES = lambda x: x.dribbles
+# FOULS = lambda x: x.fouls
+# FOULED = lambda x: x.fouled
+# AGGRESSION_OWN = lambda x: float(x.fouls) / float(x.tackles) if x.tackles > 0 else None
+# AGGRESSION_OPP = lambda x: float(x.fouled) / float(x.tackled) if x.tackled > 0 else None
+
+
 
 # Define the 'aggregation' here (average, median, total)
 SUM = lambda x: sum(x)
