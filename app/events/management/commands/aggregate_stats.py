@@ -1,6 +1,10 @@
 # aggregate_stats.py
 
-# example command line: $ python manage.py aggregate_stats --sw_id=3 --moment=GOAL --metric=passes --moment_team=Self
+# example command lines: 
+
+#$ python manage.py aggregate_stats --sw_id=3 --moment=GOAL --moment_team=Self --metric_fcn=passes --aggregate_fcn=sum --lift_type="Per Min" --min_tw=5
+#$ python manage.py aggregate_stats --sw_id=3 --moment=GOAL --moment_team=Oppo --metric_fcn=pass_accuracy --aggregate_fcn=average --lift_type="Total" --min_tw=5
+
 
 # INPUT: 1) a team's sw_id
 #		 2) the type of statistic events by which you want to define a moment
@@ -49,26 +53,20 @@ class Command(BaseCommand):
 			help="TeamIdentifier = Self, Oppo, or Both",
 			)
 		parser.add_argument(
-			"--metric",
-			dest="metric",
-			default="",
-			help="Identify which metric to pull",
+			"--metric_fcn",
+			dest="metric_fcn",
+			default="passes",
+			help="Identify which metric function to use on minute events (e.g. 'pass_accuracy')",
 			)
-		# parser.add_argument(
-		# 	"--metric_function_name",
-		# 	dest="metric_function_name",
-		# 	default="passes",
-		# 	help="Identify which metric function to use on minute events (e.g. 'pass_accuracy')",
-		# 	)
-		# parser.add_argument(
-		# 	"--aggregate_function_name",
-		# 	dest="aggregate_function_name",
-		# 	default="average",
-		# 	help="Identify which aggregate function to use on collection of window metrics",
-		# 	)
 		parser.add_argument(
-			"--time_type",
-			dest="time_type",
+			"--aggregate_fcn",
+			dest="aggregate_fcn",
+			default="sum",
+			help="Identify which aggregate function to use on collection of window metrics",
+			)
+		parser.add_argument(
+			"--lift_type",
+			dest="lift_type",
 			default="",
 			help="Time Type of Lift Calculation: Total, Per Min",
 			)		
@@ -110,10 +108,12 @@ class Command(BaseCommand):
 			raise Exception("Please explain how to define moments; format of 'EventAction,TeamIdentifier;' please; TeamIdentifier = Self,Oppo,Both")
 		if not options["moment_team"]:
 			raise Exception("Do the moments apply to Self, Oppo, or Both?")
-		if not options["metric"]:
+		if not options["metric_fcn"]:
 			raise Exception("We need a metric to aggregate")
-		if not options["time_type"]:
-			raise Exception("We need a calculation time type: Total, Per Min")
+		if not options["aggregate_fcn"]:
+			raise Exception("We need a way to aggregate")
+		if not options["lift_type"]:
+			raise Exception("We need a lift time type: Total, Per Min")
 
 		# save the inputs as variables
 		arg_sw_id = options["sw_id"]
@@ -121,7 +121,9 @@ class Command(BaseCommand):
 		arg_moment_team = options["moment_team"]
 		if arg_moment_team not in ["Self", "Oppo", "Both"]:
 			raise Exception("Unknown team identifier: " + str(arg_moment_team) + "\nShould be either Self, Oppo, Both")
-		arg_metric = options["metric"]
+		arg_metric_fcn = options["metric_fcn"]
+		arg_aggregate_fcn = options["aggregate_fcn"]
+
 		arg_daterange = options["daterange"]
 		arg_start_date = None
 		arg_end_date = None
@@ -132,7 +134,7 @@ class Command(BaseCommand):
 
 			if arg_start_date > arg_end_date:
 				raise Exception("Wrong date order")
-		arg_time_type_code = get_time_type_code(options["time_type"])
+		arg_lift_type = options["lift_type"]
 
 		arg_min_tw = float(options["min_tw"])
 		if not arg_min_tw:
@@ -173,16 +175,18 @@ class Command(BaseCommand):
 		4) Aggregate metric over time windows
 		"""
 		agg_stats = {}
-		met = metric_command(arg_metric)
 		for game in games:
 			agg_stats[game] = do_collect_and_aggregate(arg_team, game \
 					,windows=time_windows[game], meta_info=meta_info[game] \
-					,agg_tally_moments=agg_tally_moments[game], metric=met)
+					,agg_tally_moments=agg_tally_moments[game] \
+					,metric_fcn=MAP_METRIC_FCN[arg_metric_fcn] \
+					,aggregate_fcn=MAP_AGGREGATE_FCN[arg_aggregate_fcn])
+
 
 		"""
 		5) Calculate Lifts
 		"""
-		lift_info, agg_stats = calculate_lift(games, agg_stats, arg_time_type_code, arg_min_tw)
+		lift_info, agg_stats = calculate_lift(games, agg_stats, MAP_LIFT_TYPE_FCN[arg_lift_type], arg_min_tw)
 		for game in games:
 			print("\n" + str(game))
 			for item in agg_stats[game]:
