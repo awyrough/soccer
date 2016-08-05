@@ -2,46 +2,55 @@ from events.utils.time_and_statistic import *
 import numpy as np
 import numbers
 
+
+# Create a function to be used in all of the Lambda functions below
+def ratio_with_nones(numerator, denominator):
+	return float(numerator) / float(denominator) if float(denominator) > 0 else None
+
 # Define the 'metric' here
 PASSES = lambda x: x.passes
 GOALS = lambda x: x.goals
-PASS_ACCURACY = lambda x: float(x.passes_succ) / float(x.passes) if x.passes > 0 else None
-# SHOTS = lambda x: x.shots
-# SHOTS_ON_TARGET = lambda x: x.shots_ot
-# SHOT_ACCURACY = lambda x: float(x.shots_ot) / float(x.shots) if x.shots > 0 else None
-# SHOTS_INSIDE_BOX = lambda x: x.shots_inside_box
-# SHOT_ACCURACY_INSIDE_BOX
-# SHOTS_OUTSIDE_BOX = lambda x: x.shots_outside_box
-# SHOT_ACCURACY_OUTSIDE_BOX
-# CORNERS = lambda x: x.corners
-# FREE_KICKS = lambda x: x.free_kicks_taken
-# PEN_AREA_ENTRIES = lambda x: x.entries_pen_area
-# PEN_AREA_ENTRY_ACCURACY 
-# FINAL_3RD_ENTRIES = lambda x: x.entries_final_3rd
-# PASSES_OWNHALF = lambda x: x.passes_attempted_ownhalf
-# PASSES_OPPHALF = lambda x: x.passes_attempted_opphalf
-# PASS_ACCURACY_OWNHALF
-# PASS_ACCURACY_OPPHALF
-# PASSES_FIRST_TIME = lambda x: x.first_time_passes
-# PASS_ACCURACY_FIRST_TIME
-# CLEARANCES = lambda x: x.clearances
-# INTERCEPTIONS = lambda x: x.interceptions
-# BLOCKS = lambda x: x.blocks
-# OFFSIDES = lambda x: x.offsides
-# DRIBBLES = lambda x: x.dribbles
-# FOULS = lambda x: x.fouls
-# FOULED = lambda x: x.fouled
-# AGGRESSION_OWN = lambda x: float(x.fouls) / float(x.tackles) if x.tackles > 0 else None
-# AGGRESSION_OPP = lambda x: float(x.fouled) / float(x.tackled) if x.tackled > 0 else None
-
+PASS_ACCURACY = lambda x: ratio_with_nones(x.passes_succ, x.passes) 
+SHOTS = lambda x: x.shots
+SHOTS_ON_TARGET = lambda x: x.shots_OT
+SHOTS_OFF_TARGET = lambda x: x.shots - x.shots_OT
+SHOT_ACCURACY = lambda x: ratio_with_nones(x.shots_OT, x.shots)
+SHOTS_INSIDE_BOX = lambda x: x.shots_inside_box
+SHOTS_INSIDE_BOX_ON_TARGET = lambda x: x.shots_OT_inside_box
+SHOT_ACCURACY_INSIDE_BOX = lambda x: ratio_with_nones(x.shots_OT_inside_box, x.shots_inside_box)
+SHOTS_OUTSIDE_BOX = lambda x: x.shots_outside_box
+SHOTS_OUTSIDE_BOX_ON_TARGET = lambda x: x.shots_OT_outside_box
+SHOT_ACCURACY_OUTSIDE_BOX = lambda x: ratio_with_nones(x.shots_OT_outside_box, x.shots_outside_box)
+CORNERS = lambda x: x.corners
+FREE_KICKS = lambda x: x.free_kicks_taken
+PEN_AREA_ENTRIES = lambda x: x.entries_pen_area
+PEN_AREA_ENTRIES_SUCC = lambda x: x.entries_pen_area_succ
+PEN_AREA_ENTRIES_UNSUCC = lambda x: x.entries_pen_area_unsucc
+PEN_AREA_ENTRY_ACCURACY = lambda x: ratio_with_nones(x.entries_pen_area_succ, x.entries_pen_area)
+FINAL_3RD_ENTRIES = lambda x: x.entries_final_third
+PASSES_OWNHALF = lambda x: x.passes_attempted_ownhalf
+PASSES_OWNHALF_SUCC = lambda x: x.passes_successful_ownhalf
+PASSES_OPPHALF = lambda x: x.passes_attempted_opphalf
+PASSES_OPPHALF_SUCC = lambda x: x.passes_successful_opphalf
+PASS_ACCURACY_OWNHALF = lambda x: ratio_with_nones(x.passes_successful_ownhalf, x.passes_attempted_ownhalf)
+PASS_ACCURACY_OPPHALF = lambda x: ratio_with_nones(x.passes_successful_opphalf, x.passes_attempted_opphalf)
+PASSES_FIRST_TIME = lambda x: x.first_time_passes
+PASSES_FIRST_TIME_SUCC = lambda x: x.first_time_complete
+PASS_ACCURACY_FIRST_TIME = lambda x: ratio_with_nones(x.first_time_complete, x.first_time_passes)
+CLEARANCES = lambda x: x.clearances
+INTERCEPTIONS = lambda x: x.interceptions
+BLOCKS = lambda x: x.blocks
+OFFSIDES = lambda x: x.offsides
+DRIBBLES = lambda x: x.dribbles
+FOULS = lambda x: x.fouls
+FOULED = lambda x: x.fouled
+AGGRESSION_OWN = lambda x: ratio_with_nones(x.fouls, x.tackles)
+AGGRESSION_OPP = lambda x: ratio_with_nones(x.fouled, x.tackled) 
 
 
 # Define the 'aggregation' here (average, median, total)
 SUM = lambda x: sum(x)
 AVERAGE = lambda x: np.mean(x)
-
-def pass_accuracy_improved(event):
-	return float(event.passes_succ) / float(event.passes) if event.passes > 0 else None
 
 def average_with_nones(values):
 	non_null = [val for val in values if isinstance(val, numbers.Number)]
@@ -53,6 +62,9 @@ MAP_METRIC_FCN = {
 	"passes": PASSES
 	,"goals": GOALS
 	,"pass_accuracy": PASS_ACCURACY
+	,"shot_accuracy": SHOT_ACCURACY
+	,"final_3rd_entries": FINAL_3RD_ENTRIES
+	,"pen_area_entry_accuracy": PEN_AREA_ENTRY_ACCURACY
 }
 
 MAP_AGGREGATE_FCN = {
