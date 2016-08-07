@@ -113,6 +113,8 @@ def create_windows_for_game(team, game, action, identifier):
         windows.append(window)
         start = end # remember the start of window is exclusive
         last_action = action
+        if end == -2:
+            break
     if last_action.get_minute_ceiling() != -2:
         windows.append([start, StatisticEvent.SECOND_HALF_EXTRA_TIME])
     return windows
@@ -136,6 +138,8 @@ def create_window_meta_information_for_game(team, game, action, identifier):
     for action in actions:
         meta_info.append(str(action.action_team) + " > " + str(action.action))
         last_action = action
+        if action.get_minute_ceiling() == -2:
+            break
     if (last_action.get_minute_ceiling() == -2) and (len(actions) == 1):
         meta_info = ["Game Start; End with stoppage time " + str(last_action.action_team) \
             + " > " + str(last_action.action)]

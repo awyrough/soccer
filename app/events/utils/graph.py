@@ -25,7 +25,7 @@ def plot_scatterplot(lift_tuple):
 	plt.axhline(y=0, color="black", linestyle="dashed")
 	plt.axhline(y=mean, color="blue")
 		
-	ax.set_title('Avg Lift = %s \n Signif  = %s' % (mean, 1-p_val))
+	ax.set_title('Avg Lift = %s \n Signif  = %s' % (mean*100, 1-p_val))
 	plt.margins(x=0.05, y=0.05)
 	ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
 	plt.legend()

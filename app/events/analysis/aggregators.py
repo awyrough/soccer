@@ -47,6 +47,8 @@ OFFSIDES = lambda x: x.offsides
 DRIBBLES = lambda x: x.dribbles
 FOULS = lambda x: x.fouls
 FOULED = lambda x: x.fouled
+TACKLES = lambda x: x.tackles
+TACKLED = lambda x: x.tackled
 AGGRESSION_OWN = lambda x: ratio_with_nones(x.fouls, x.tackles)
 AGGRESSION_OPP = lambda x: ratio_with_nones(x.fouled, x.tackled) 
 YELLOW_CARDS = lambda x: x.yellow_cards
@@ -70,6 +72,20 @@ MAP_METRIC_FCN = {
 	,"shot_accuracy": SHOT_ACCURACY
 	,"final_3rd_entries": FINAL_3RD_ENTRIES
 	,"pen_area_entry_accuracy": PEN_AREA_ENTRY_ACCURACY
+	,"offsides":OFFSIDES
+	,"dribbles":DRIBBLES
+	,"aggression_own":AGGRESSION_OWN
+	,"aggression_opp":AGGRESSION_OPP
+	,"tackles":TACKLES
+	,"tackled":TACKLED
+	,"fouls":FOULS
+	,"blocks":BLOCKS
+	,"interceptions":INTERCEPTIONS
+	,"clearances":CLEARANCES
+	,"shots_inside_box":SHOTS_INSIDE_BOX
+	,"shots_outside_box":SHOTS_OUTSIDE_BOX
+	,"shot_accuracy_inside_box":SHOT_ACCURACY_INSIDE_BOX
+	,"shot_accuracy_outside_box":SHOT_ACCURACY_OUTSIDE_BOX
 }
 
 MAP_AGGREGATE_FCN = {

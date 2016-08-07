@@ -6,16 +6,8 @@
 #$ python manage.py aggregate_stats --sw_id=3 --moment=GOAL --moment_team=Oppo --metric_fcn=pass_accuracy --aggregate_fcn=average --lift_type="Total" --min_tw=5
 
 
-# INPUT: 1) a team's sw_id
-#		 2) the type of statistic events by which you want to define a moment
-#			2.5) as well as which team each should apply to (Self, Opponent, or Both)
-#		 3) the metric of interest
-#		 4) (optional) a date range
-#		 5) (optional) print to csv 
-#		 6) (optional) min time window
-#		 7) (optional) max time window
-#
-# OUTPUT: aggregated stats for the games
+# INPUT: 
+# OUTPUT:
 
 import datetime
 
@@ -96,7 +88,14 @@ class Command(BaseCommand):
             default=False,
             help="save file?",
             )
-	
+		# add optional argument for outliers
+		parser.add_argument(
+			"--outliers",
+			action="store_true",
+            dest="outliers",
+            default=False,
+            help="Should we calculate outliers?",
+            )
 	def handle(self,*args,**options):
 		"""
 		1) Intake all variables
@@ -149,13 +148,19 @@ class Command(BaseCommand):
 			arg_print_to_csv = True
 		else:
 			arg_print_to_csv = False
-		
+
+		arg_outliers = options["outliers"]
+		if arg_outliers:
+			arg_outliers = True
+		else:
+			arg_outliers = False
+
 		"""
 		2) Find all relevant games
 		"""
 		# pull the team name
 		arg_team = Team.objects.get(sw_id=arg_sw_id)
-		print("TEAM: " + str(arg_team) + "\n")
+		#print("TEAM: " + str(arg_team) + "\n")
 
 		# find all home/away games for the team, and order ASC by date
 		games = get_team_games(arg_team, arg_start_date, arg_end_date)
@@ -192,38 +197,29 @@ class Command(BaseCommand):
 			for item in agg_stats[game]:
 				print(agg_stats[game][item])
 
-		print("\n \n \n \n")
+		# print("\n \n \n \n")
 
 		"""
-		6) Calculate Outliers (Don't want to as of 8/3)
+		6) Choose if we're doing outliers 
 		"""
-		# non_outliers, outliers = run_outlier_check(lift_info)
+		if arg_outliers:
+			non_outliers, outliers = run_outlier_check(lift_info)
 
-		# print "outlier count = ", len(outliers)
-		# print "outliers:"
-		# for item in outliers:
-		# 	print '%s, on %s. z-score = %s' % (item[0],item[1],item[2])
-		# print("\n")
+			print "outlier count = ", len(outliers)
+			print "non_outlier count = ", len(non_outliers)
+			print "outliers:"
+			for item in outliers:
+				print '%s, on %s. z-score = %s' % (item[0],item[1],item[2])
+			print("\n")
 
-		# print "non_outlier count", len(non_outliers)
+			lift_info = non_outliers
+		
 
 		"""
 		7) Calculate Statistical Significance
 		"""
-
-		# mean, t_stat, p_val = statistical_significance(non_outliers)
-
-		# mean = round(mean, 5)
-
-		# print "mean percentage lift = ", (mean*100)
-		# print "statistical significance = ", ((1-p_val))
-
-
-		"""
-		8) Calculate Statistical Significance (No outliers)
-		"""
 		print "Time Window Minimum Limit of %s Mins " % (arg_min_tw)
-		print("\n \n \n \n")
+		print("\n")
 
 		mean, t_stat, p_val = statistical_significance(lift_info)
 
@@ -231,7 +227,7 @@ class Command(BaseCommand):
 
 		print "mean percentage lift = ", (mean*100)
 		print "statistical significance = ", ((1-p_val))
-		print("\n \n \n \n")
+		print("\n")
 
 		"""
 		9) Plot output as a scatter plot
