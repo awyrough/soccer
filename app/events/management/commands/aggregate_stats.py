@@ -251,6 +251,8 @@ class Command(BaseCommand):
 		"""
 		9) Plot output as a scatter plot
 		"""
-		plot_scatterplot(lift_info)
+		title = "%s -- %s \nMoment = %s (%s); Time Windows > %s min; Outliers = %s" % \
+				(str(arg_team), str(arg_metric_fcn), str(arg_moment), str(arg_moment_team), str(arg_min_tw), str(arg_outliers))
+		plot_scatterplot(lift_info, title)
 
 	
