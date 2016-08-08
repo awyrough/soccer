@@ -21,6 +21,8 @@ SHOT_ACCURACY_INSIDE_BOX = lambda x: ratio_with_nones(x.shots_on_target_inside_b
 SHOTS_OUTSIDE_BOX = lambda x: x.shots_outside_box
 SHOTS_OUTSIDE_BOX_ON_TARGET = lambda x: x.shots_on_target_outside_box
 SHOT_ACCURACY_OUTSIDE_BOX = lambda x: ratio_with_nones(x.shots_on_target_outside_box, x.shots_outside_box)
+SHOT_BALANCE = lambda x: ratio_with_nones(x.shots_inside_box, x.shots_outside_box + x.shots_inside_box)
+
 BLOCKED_SHOTS = lambda x: x.blocked_shots
 SHOT_BLOCKED_RATIO = lambda x: ratio_with_nones(x.blocked_shots, x.shots)
 CORNERS = lambda x: x.corners
@@ -40,6 +42,8 @@ PASSES_FIRST_TIME = lambda x: x.first_time_passes
 PASSES_FIRST_TIME_SUCC = lambda x: x.first_time_passes_complete
 PASSES_FIRST_TIME_UNSUCC = lambda x: x.first_time_passes_incomplete
 PASS_ACCURACY_FIRST_TIME = lambda x: ratio_with_nones(x.first_time_passes_complete, x.first_time_passes)
+PASS_BALANCE = lambda x: ratio_with_nones(x.passes_attempted_opphalf, x.passes_attempted_ownhalf + x.passes_attempted_opphalf)
+
 CLEARANCES = lambda x: x.clearances
 INTERCEPTIONS = lambda x: x.interceptions
 BLOCKS = lambda x: x.blocks
@@ -49,6 +53,7 @@ FOULS = lambda x: x.fouls
 FOULED = lambda x: x.fouled
 TACKLES = lambda x: x.tackles
 TACKLED = lambda x: x.tackled
+TACKLE_BALANCE = lambda x: ratio_with_nones(x.tackles, x.tackles + x.tackled)
 AGGRESSION_OWN = lambda x: ratio_with_nones(x.fouls, x.tackles)
 AGGRESSION_OPP = lambda x: ratio_with_nones(x.fouled, x.tackled) 
 YELLOW_CARDS = lambda x: x.yellow_cards
@@ -69,6 +74,7 @@ MAP_METRIC_FCN = {
 	"passes": PASSES
 	,"goals": GOALS
 	,"pass_accuracy": PASS_ACCURACY
+	,"pass_balance":PASS_BALANCE
 	,"shot_accuracy": SHOT_ACCURACY
 	,"final_3rd_entries": FINAL_3RD_ENTRIES
 	,"pen_area_entry_accuracy": PEN_AREA_ENTRY_ACCURACY
@@ -78,6 +84,7 @@ MAP_METRIC_FCN = {
 	,"aggression_opp":AGGRESSION_OPP
 	,"tackles":TACKLES
 	,"tackled":TACKLED
+	,"tackle_balance":TACKLE_BALANCE
 	,"fouls":FOULS
 	,"blocks":BLOCKS
 	,"interceptions":INTERCEPTIONS
@@ -86,6 +93,7 @@ MAP_METRIC_FCN = {
 	,"shots_outside_box":SHOTS_OUTSIDE_BOX
 	,"shot_accuracy_inside_box":SHOT_ACCURACY_INSIDE_BOX
 	,"shot_accuracy_outside_box":SHOT_ACCURACY_OUTSIDE_BOX
+	,"shot_balance":SHOT_BALANCE
 }
 
 MAP_AGGREGATE_FCN = {
