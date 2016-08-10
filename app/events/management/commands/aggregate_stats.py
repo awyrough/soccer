@@ -246,6 +246,13 @@ class Command(BaseCommand):
 
 		print "Mean Percentage Change = ", (mean*100)
 		print "Statistical Significance = ", ((1-p_val))
+		print("")
+		print mean*100
+		print 1-p_val
+		if arg_outliers:
+			print len(outliers)
+		else:
+			print "N/A"
 		print("\n")
 
 		"""

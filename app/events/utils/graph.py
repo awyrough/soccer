@@ -17,13 +17,13 @@ def plot_scatterplot(lift_tuple, title_string):
 		date = pd.to_datetime(item[1])
 
 		#with plt.style.context('ggplot'):
-		ax.scatter(date, lift, color='blue')
+		ax.scatter(date, lift*100, color='blue')
 
 
 	mean, t_stat, p_val = statistical_significance(lift_tuple)
 
-	plt.axhline(y=0, color="black", linestyle="dashed")
-	plt.axhline(y=mean, color="blue")
+	plt.axhline(y=0, color="black")
+	plt.axhline(y=mean*100, color="blue", linestyle="dashed")
 		
 	ax.set_title(title_string + '\nAvg Lift = %s \n Signif  = %s' % (mean*100, 1-p_val))
 	plt.margins(x=0.05, y=0.05)

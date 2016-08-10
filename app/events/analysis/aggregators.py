@@ -75,8 +75,14 @@ MAP_METRIC_FCN = {
 	,"goals": GOALS
 	,"pass_accuracy": PASS_ACCURACY
 	,"pass_balance":PASS_BALANCE
+	,"passes_first_time":PASSES_FIRST_TIME
+	,"passes_first_time_accuracy":PASS_ACCURACY_FIRST_TIME
+	,"passes_first_time_succ":PASSES_FIRST_TIME_SUCC
+	,"shots":SHOTS
 	,"shot_accuracy": SHOT_ACCURACY
+	,"shots_on_target": SHOTS_ON_TARGET
 	,"final_3rd_entries": FINAL_3RD_ENTRIES
+	,"pen_area_entries":PEN_AREA_ENTRIES
 	,"pen_area_entry_accuracy": PEN_AREA_ENTRY_ACCURACY
 	,"offsides":OFFSIDES
 	,"dribbles":DRIBBLES
