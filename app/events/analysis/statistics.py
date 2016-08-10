@@ -27,8 +27,8 @@ def LIFT_PER_MIN(previous, current):
 	return (post - pre) / pre
 
 MAP_LIFT_TYPE_FCN = {
-	"Total": LIFT_TOTAL
-	,"Per Min": LIFT_PER_MIN
+	"total": LIFT_TOTAL
+	,"per_min": LIFT_PER_MIN
 }
 
 def calculate_lift(games, agg_collection, lift_fcn, min_time_window):
