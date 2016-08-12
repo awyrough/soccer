@@ -72,10 +72,14 @@ class Command(BaseCommand):
 
 		for key, value in metric_info.iteritems():
 			for increment_pair in increments:
+				if increment_pair[0] == increment_pair[1]:
+					arg_iters = 1
+				else:
+					arg_iters = arg_iterations
 				#pool results of each iteration to then take an average to add to the output
 				iter_pool = []
 				
-				for x in range(1, arg_iterations+1):
+				for x in range(1, arg_iters+1):
 					main, non_numerical, numerical = simulate(sw_id, value[0], \
 					value[1], value[2], incr_minimum=increment_pair[0], \
 					incr_maximum=increment_pair[1], outliers_flag=True, iteration=x)
@@ -89,7 +93,7 @@ class Command(BaseCommand):
 					iter_pool.append(numerical)
 
 				#add the average row in
-				results.append(average_iterations(non_numerical, iter_pool, arg_iterations))
+				results.append(average_iterations(non_numerical, iter_pool, arg_iters))
 
 
 		if arg_print_to_csv:
