@@ -80,6 +80,12 @@ class Command(BaseCommand):
             default=0.0,
             help="maximum length of time windows to compute lifts for",
             )
+		parser.add_argument(
+			"--null_hypo",
+            dest="null_hypo",
+            default=0.0,
+            help="null hypothesis for statistical test; based off simulations",
+            )
 		# add optional print to csv flag
 		parser.add_argument(
 			"--print_to_csv",
@@ -240,10 +246,10 @@ class Command(BaseCommand):
 			print "Time Window Minimum Limit of %s Mins " % (arg_min_tw)
 			print("\n")
 
-		mean, t_stat, p_val = statistical_significance(lift_info)
+		mean, t_stat, p_val = statistical_significance(lift_info, null_hypo)
 
 		mean = round(mean, 8)
-
+		print "Null Hypothesis = ", null_hypo
 		print "Mean Percentage Change = ", (mean*100)
 		print "Statistical Significance = ", ((1-p_val))
 		print("")

@@ -2,6 +2,7 @@
 
 
 import datetime
+import numpy as np
 
 from django.core.management.base import BaseCommand, CommandError
 from games.models import *
@@ -32,7 +33,7 @@ def average_iterations(beginning_list, iteration_pool_list, iteration_count):
 		[str(mean/iteration_count)]	+ [str(sig/iteration_count)]+ [str(p_val/iteration_count)] + ["NO CODE"]
 
 	return row
-	
+
 def simulate(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
 	end_minute=90, incr_minimum=5, incr_maximum=5, daterange=False,
 	print_to_csv=False,outliers_flag=False,iteration=0):
@@ -161,4 +162,112 @@ def simulate(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0,
 	numerical = f[14:19]
 	return f, non_numerical, numerical
 
+
+def null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
+	end_minute=90, incr_minimum=5, incr_maximum=90, start_date=False, end_date=False,
+	outliers_flag=False,iterations=0):
+	if iterations == 0:
+		raise Exception("Need iterations for the null hypothesis simulator")
+
+	means = []
+	for x in range(0,iterations):
+		mean = null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, \
+			start_minute=start_minute, incr_minimum=incr_minimum, incr_maximum=incr_maximum, \
+			end_minute=end_minute, start_date=start_date, end_date=end_date, \
+			outliers_flag=outliers_flag)
+		means.append(mean)
+
+	means = np.array(means)
+	return np.mean(means)
+
+def null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
+	end_minute=90, incr_minimum=5, incr_maximum=90, start_date=False, end_date=False,
+	outliers_flag=False):
+	"""
+	1) Intake all variables
+	"""
+	start_date = False
+	end_date = False
+	if start_date:
+		if start_date > end_date:
+			print start_date
+			print end_date
+			raise Exception("Wrong date order")
+
+	"""
+	2) Find all relevant games
+	"""
+	#pull the tema name
+	team = Team.objects.get(sw_id=sw_id)
+	#find all home/away games for the team
+	games = get_team_games(team, start_date, end_date)
+
+	"""
+	3) Pull time windows, meta information, and aggregate tally of the moments for analysis
+	"""
+	time_windows = {}
+	meta_info = {}
+	agg_tally_moments = {}
+	for game in games:
+		time_windows[game] = create_random_artificial_windows_with_bounds(start=start_minute, \
+			end=end_minute, inc_min=incr_minimum, inc_max=incr_maximum)
+		meta_info[game] = []
+		agg_tally_moments[game] = []
+		# fill out the other dictionarys with dummy information (easy fix for not needing this)
+		for item in time_windows[game]:
+			meta_info[game].append("Simulation")
+			agg_tally_moments[game].append(0)	
+
+	"""
+	4) Aggregate metric over time windows
+	"""
+	agg_stats = {}
+	for game in games:
+		agg_stats[game] = do_collect_and_aggregate(team, game \
+				,windows=time_windows[game], meta_info=meta_info[game] \
+				,agg_tally_moments=agg_tally_moments[game] \
+				,metric_fcn=MAP_METRIC_FCN[metric_fcn] \
+				,aggregate_fcn=MAP_AGGREGATE_FCN[aggregate_fcn])
+
+
+	"""
+	5) Calculate Lifts
+	"""
+	lift_info, agg_stats = calculate_lift(games, agg_stats, MAP_LIFT_TYPE_FCN[lift_type])
+	# for game in games:
+	# 	print("\n" + str(game))
+	# 	for item in agg_stats[game]:
+	# 		print(agg_stats[game][item])
+
+	"""
+	6) Choose if we're doing outliers 
+	"""
+	if outliers_flag:
+		non_outliers, outliers = run_outlier_check(lift_info)
+
+		# print "outlier count = ", len(outliers)
+		# print "non_outlier count = ", len(non_outliers)
+		# print "outliers:"
+		# for item in outliers:
+		# 	print '    %s, on %s. z-score = %s' % (item[0],item[1],item[2])
+		# print("\n")
+
+		lift_info = non_outliers
+
+	# """
+	# 7) Calculate Statistical Significance
+	# """
+	# # if arg_details:
+	# # 	print "Time Window Minimum Limit of %s Mins " % (arg_min_tw)
+	# # 	print("\n")
+
+	# mean, t_stat, p_val = statistical_significance(lift_info)
+
+	# mean = round(mean, 8)
+
+	"""
+	8) Return mean lift value for this simulation run (to then be averaged)
+	"""
+	mean, t_stat, p_val = statistical_significance(lift_info)
+	return mean
 	
