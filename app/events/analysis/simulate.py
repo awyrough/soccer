@@ -14,9 +14,28 @@ from events.analysis.aggregators import *
 from events.analysis.generators import *
 from events.analysis.statistics import *
 
+def average_iterations(beginning_list, iteration_pool_list, iteration_count):
+	outlier_ct = 0.0
+	non_outlier_ct = 0.0
+	mean = 0.0
+	sig = 0.0
+	p_val = 0.0
+
+	for item in iteration_pool_list:
+		outlier_ct += item[0]
+		non_outlier_ct += item[1]
+		mean += item[2]
+		sig += item[3]
+		p_val += item[4]
+
+	row = beginning_list + ["AVERAGE"]+ [str(outlier_ct/iteration_count)] + [str(non_outlier_ct/iteration_count)] + \
+		[str(mean/iteration_count)]	+ [str(sig/iteration_count)]+ [str(p_val/iteration_count)] + ["NO CODE"]
+
+	return row
+	
 def simulate(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
 	end_minute=90, incr_minimum=5, incr_maximum=5, daterange=False,
-	print_to_csv=False,outliers_flag=False):
+	print_to_csv=False,outliers_flag=False,iteration=0):
 	"""
 	1) Intake all variables
 	"""
@@ -69,12 +88,11 @@ def simulate(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0,
 	"""
 	5) Calculate Lifts
 	"""
-	min_tw
 	lift_info, agg_stats = calculate_lift(games, agg_stats, MAP_LIFT_TYPE_FCN[lift_type])
-	for game in games:
-		print("\n" + str(game))
-		for item in agg_stats[game]:
-			print(agg_stats[game][item])
+	# for game in games:
+	# 	print("\n" + str(game))
+	# 	for item in agg_stats[game]:
+	# 		print(agg_stats[game][item])
 
 	"""
 	6) Choose if we're doing outliers 
@@ -106,16 +124,12 @@ def simulate(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0,
 	8) Print / Return valuable information
 
 	list columns: 
-	sw_id, Team, moment, moment_team, metric_fcn, aggregate_fcn, lift_type, start_minute, end_minute, incr_minimum, incr_maximum, daterange, start_date, end_date, outliers_flag \
+	sw_id, Team, metric_fcn, aggregate_fcn, lift_type, start_minute, end_minute, incr_minimum, incr_maximum, iteration, daterange, start_date, end_date, outliers_flag \
 		,outlier_count, non_outlier_count, mean_value, statistical_significance, p_value, terminal_command
 	"""
-	moment = "Simulation"
-	moment_team = "Simulation"
 	f = []
 	f.append(sw_id)
 	f.append(str(team))
-	f.append(moment)
-	f.append(moment_team)
 	f.append(metric_fcn)
 	f.append(aggregate_fcn)
 	f.append(lift_type)
@@ -127,20 +141,24 @@ def simulate(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0,
 	f.append(start_date)
 	f.append(end_date)
 	f.append(outliers_flag)
+	f.append(iteration)
 	f.append(len(outliers))
 	f.append(len(non_outliers))
 	f.append(mean*100)
 	f.append(1-p_val)
 	f.append(p_val)
-	command = "python manage.py aggregate_stats --sw_id=" + str(sw_id) + " --moment=" + str(moment) + " --moment_team=" + str(moment_team) \
-		+ " --metric_fcn="  + str(metric_fcn) + " --aggregate_fcn=" + str(aggregate_fcn) + " --lift_type=" + str(lift_type) + " --min_tw=" + str(min_tw) \
-		+ " --max_tw=" + str(max_tw) + " --details"
+	command = "python manage.py simulate_stats --sw_id=" + str(sw_id) + " --metric_fcn="  + str(metric_fcn) + " --aggregate_fcn=" \
+		+ str(aggregate_fcn) + " --lift_type=" + str(lift_type) + " --start_minute=" + str(start_minute) \
+		+ " --end_minute=" + str(end_minute) + " --incr_min=" + str(incr_minimum) \
+		+ " --incr_max=" + str(incr_maximum) 
 	if daterange:
 		command = command + " --daterange=\"" + str(start_date) + "," + str(end_date) + "\""
 	if outliers_flag:
 		command = command + " --outliers"
 	f.append(command)
 
-	return f
+	non_numerical = f[0:13]
+	numerical = f[14:19]
+	return f, non_numerical, numerical
 
 	

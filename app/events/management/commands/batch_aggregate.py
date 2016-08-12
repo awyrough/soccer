@@ -1,8 +1,9 @@
-# analyze_multiple.py
+# batch_aggregate.py
 
 import datetime
 import csv
 import os
+import time
 
 from django.core.management.base import BaseCommand, CommandError
 from games.models import *
@@ -24,6 +25,8 @@ class Command(BaseCommand):
             )
 	def handle(self,*args,**options):
 		arg_print_to_csv = options["print_to_csv"]
+
+		START = time.time()
 
 		results = []
 
@@ -51,7 +54,7 @@ class Command(BaseCommand):
 			,17:["tackle_balance","average","total"]
 			,18:["aggression_own","average","total"]
 		}
-		min_tws = [5.0]
+		min_tws = [5.0, 7.5, 10.0]
 
 		count = 0
 
@@ -62,8 +65,11 @@ class Command(BaseCommand):
 						results.append(aggregate(sw_id, moment, moment_team, value[0], \
 						value[1], value[2], min_tw=min_tw, \
 						outliers_flag=True))
+						
 						count += 1
-						print "Analyzed %s Aggregations" % str(count)
+						if count % 25 == 0:
+							print "Analyzed %s Aggregations" % str(count)
+							print "Elapsed Time = %s mins" % str((time.time()-START)/60)
 
 
 
@@ -88,6 +94,8 @@ class Command(BaseCommand):
 				writer.writerow(item)
 
 			output.close()
+			
+			print "Total Elapsed Time = %s mins" % str((time.time()-START)/60)
 
 		else:
 			for item in results:

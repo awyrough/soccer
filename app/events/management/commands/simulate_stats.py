@@ -91,6 +91,15 @@ class Command(BaseCommand):
             default=False,
             help="save file?",
             )
+		# add optional print to csv flag
+		parser.add_argument(
+			"--outliers",
+			action="store_true",
+            dest="outliers",
+            default=False,
+            help="outliers?",
+            )
+	
 	
 	def handle(self,*args,**options):
 		"""
@@ -130,6 +139,7 @@ class Command(BaseCommand):
 			if arg_start_date > arg_end_date:
 				raise Exception("Wrong date order")
 		arg_lift_type = options["lift_type"]
+		arg_outliers = options["outliers"]
 
 		# Hard coding these min and max values because they should be irrelvant
 		arg_min_tw = 0.0
@@ -183,44 +193,32 @@ class Command(BaseCommand):
 		5) Calculate Lifts
 		"""
 		lift_info, agg_stats = calculate_lift(games, agg_stats, MAP_LIFT_TYPE_FCN[arg_lift_type], arg_min_tw)
-		for game in games:
-			print("\n" + str(game))
-			for item in agg_stats[game]:
-				print(agg_stats[game][item])
+		# for game in games:
+		# 	print("\n" + str(game))
+		# 	for item in agg_stats[game]:
+		# 		print(agg_stats[game][item])
 
-		print("\n \n \n \n")
+		# print("\n \n \n \n")
 
 		"""
-		6) Calculate Outliers (Don't want to as of 8/3)
+		6) Calculate Outliers
 		"""
-		# non_outliers, outliers = run_outlier_check(lift_info)
+		if arg_outliers:
+			non_outliers, outliers = run_outlier_check(lift_info)
 
-		# print "outlier count = ", len(outliers)
-		# print "outliers:"
-		# for item in outliers:
-		# 	print '%s, on %s. z-score = %s' % (item[0],item[1],item[2])
-		# print("\n")
+			# print "outlier count = ", len(outliers)
+			# print "outliers:"
+			for item in outliers:
+				print '%s, on %s. z-score = %s' % (item[0],item[1],item[2])
+			print("\n")
 
-		# print "non_outlier count", len(non_outliers)
+			# print "non_outlier count", len(non_outliers)
+
+			lift_info = non_outliers
 
 		"""
 		7) Calculate Statistical Significance
 		"""
-
-		# mean, t_stat, p_val = statistical_significance(non_outliers)
-
-		# mean = round(mean, 5)
-
-		# print "mean percentage lift = ", (mean*100)
-		# print "statistical significance = ", ((1-p_val))
-
-
-		"""
-		8) Calculate Statistical Significance (No outliers)
-		"""
-		print "Time Window Minimum Limit of %s Mins " % (arg_min_tw)
-		print("\n \n \n \n")
-
 		mean, t_stat, p_val = statistical_significance(lift_info)
 
 		mean = round(mean, 8)
@@ -230,7 +228,7 @@ class Command(BaseCommand):
 		print("\n \n \n \n")
 
 		"""
-		9) Plot output as a scatter plot
+		8) Plot output as a scatter plot
 		"""
 		plot_scatterplot(lift_info, "simulation")
 
