@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from games.models import *
 from events.models import *
 
-from events.analysis.analyze import *
+from events.analysis.aggregate import *
 
 class Command(BaseCommand):
 	help = 'analyzing multiple aggregate_stats scripts at once'
@@ -36,10 +36,24 @@ class Command(BaseCommand):
 			,2:["pass_balance","average","total"]
 			,3:["passes_first_time","sum","per_min"]
 			,4:["passes_first_time_accuracy","average","total"]
-			
+			,5:["shots","sum","per_min"]
+			,6:["shots_on_target","sum","per_min"]
+			,7:["shot_accuracy","average","total"]
+			,8:["shot_balance","average","total"]
+			,9:["final_3rd_entries","sum","per_min"]
+			,10:["pen_area_entries","sum","per_min"]
+			,11:["pen_area_entry_accuracy","average","total"]
+			,12:["tackles","sum","per_min"]
+			,13:["tackled","sum","per_min"]
+			,14:["interceptions","sum","per_min"]
+			,15:["clearances","sum","per_min"]
+			,16:["fouls","sum","per_min"]
+			,17:["tackle_balance","average","total"]
+			,18:["aggression_own","average","total"]
 		}
-		min_tws = [0.0, 2.5, 5.0]
+		min_tws = [5.0]
 
+		count = 0
 
 		for moment in moments:
 			for key, value in metric_info.iteritems():
@@ -48,6 +62,12 @@ class Command(BaseCommand):
 						results.append(aggregate(sw_id, moment, moment_team, value[0], \
 						value[1], value[2], min_tw=min_tw, \
 						outliers_flag=True))
+						count += 1
+						print "Analyzed %s Aggregations" % str(count)
+
+
+
+
 
 		if arg_print_to_csv:
 

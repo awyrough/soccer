@@ -54,11 +54,29 @@ class Command(BaseCommand):
 			help="Time Type of Lift Calculation: Total, Per Min",
 			)
 		parser.add_argument(
-			"--increment",
-			dest="increment",
+			"--incr_min",
+			dest="incr_min",
 			default="",
-			help="How do we want to increment the simulations?",
-			)		
+			help="minimum increment for simulations?",
+			)	
+		parser.add_argument(
+			"--incr_max",
+			dest="incr_max",
+			default="",
+			help="max increment for simulations?",
+			)	
+		parser.add_argument(
+			"--start_minute",
+            dest="start_minute",
+            default=0,
+            help="Simulation start minute",
+            )	
+		parser.add_argument(
+			"--end_minute",
+            dest="end_minute",
+            default=0,
+            help="Simulation end minute",
+            )			
 		parser.add_argument(
 			"--daterange",
             dest="daterange",
@@ -87,14 +105,19 @@ class Command(BaseCommand):
 			raise Exception("We need a way to aggregate")
 		if not options["lift_type"]:
 			raise Exception("We need a lift time type: Total, Per Min")
-		if not options["increment"]:
+		if not options["incr_min"]:
+			raise Exception("We need a simulations increment")
+		if not options["incr_max"]:
 			raise Exception("We need a simulations increment")
 
 		# save the inputs as variables
 		arg_sw_id = options["sw_id"]
 		arg_metric_fcn = options["metric_fcn"]
 		arg_aggregate_fcn = options["aggregate_fcn"]
-		arg_increment = float(options["increment"])
+		arg_incr_min = float(options["incr_min"])
+		arg_incr_max = float(options["incr_max"])
+		arg_start_minute = float(options["start_minute"])
+		arg_end_minute = float(options["end_minute"])
 
 		arg_daterange = options["daterange"]
 		arg_start_date = None
@@ -135,7 +158,9 @@ class Command(BaseCommand):
 		meta_info = {}
 		agg_tally_moments = {}
 		for game in games:
-			time_windows[game] = create_artificial_windows_by_fn(lambda x: x + arg_increment, start = 0, end = 90, inc=arg_increment)
+			time_windows[game] = create_random_artificial_windows_with_bounds(start=arg_start_minute, \
+			end=arg_end_minute, inc_min=arg_incr_min, inc_max=arg_incr_max)
+
 			meta_info[game] = []
 			agg_tally_moments[game] = []
 			for item in time_windows[game]:
@@ -207,6 +232,6 @@ class Command(BaseCommand):
 		"""
 		9) Plot output as a scatter plot
 		"""
-		plot_scatterplot(lift_info)
+		plot_scatterplot(lift_info, "simulation")
 
 	
