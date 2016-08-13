@@ -163,23 +163,6 @@ def simulate(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0,
 	return f, non_numerical, numerical
 
 
-def null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
-	end_minute=90, incr_minimum=5, incr_maximum=90, start_date=False, end_date=False,
-	outliers_flag=False,iterations=0):
-	if iterations == 0:
-		raise Exception("Need iterations for the null hypothesis simulator")
-
-	means = []
-	for x in range(0,iterations):
-		mean = null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, \
-			start_minute=start_minute, incr_minimum=incr_minimum, incr_maximum=incr_maximum, \
-			end_minute=end_minute, start_date=start_date, end_date=end_date, \
-			outliers_flag=outliers_flag)
-		means.append(mean)
-
-	means = np.array(means)
-	return np.mean(means)
-
 def null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
 	end_minute=90, incr_minimum=5, incr_maximum=90, start_date=False, end_date=False,
 	outliers_flag=False):
@@ -209,6 +192,7 @@ def null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, start
 	meta_info = {}
 	agg_tally_moments = {}
 	for game in games:
+		#note that there's also this function: create_random_artificial_windows_with_dynamic_bounds()
 		time_windows[game] = create_random_artificial_windows_with_bounds(start=start_minute, \
 			end=end_minute, inc_min=incr_minimum, inc_max=incr_maximum)
 		meta_info[game] = []
@@ -217,6 +201,7 @@ def null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, start
 		for item in time_windows[game]:
 			meta_info[game].append("Simulation")
 			agg_tally_moments[game].append(0)	
+		
 
 	"""
 	4) Aggregate metric over time windows
@@ -254,20 +239,38 @@ def null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, start
 
 		lift_info = non_outliers
 
-	# """
-	# 7) Calculate Statistical Significance
-	# """
-	# # if arg_details:
-	# # 	print "Time Window Minimum Limit of %s Mins " % (arg_min_tw)
-	# # 	print("\n")
-
-	# mean, t_stat, p_val = statistical_significance(lift_info)
-
-	# mean = round(mean, 8)
-
 	"""
 	8) Return mean lift value for this simulation run (to then be averaged)
 	"""
 	mean, t_stat, p_val = statistical_significance(lift_info)
 	return mean
+
+def null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
+	end_minute=90, incr_minimum=5, incr_maximum=90, start_date=False, end_date=False,
+	outliers_flag=False,iterations=0):
+	if iterations == 0:
+		raise Exception("Need iterations for the null hypothesis simulator")
+
+	means = []
+	for x in range(0,iterations):
+		# print "\n iteration ", x
+		# print sw_id
+		# print metric_fcn
+		# print aggregate_fcn
+		# print lift_type
+		# print start_minute
+		# print end_minute
+		# print incr_maximum
+		# print incr_minimum
+		# print outliers_flag
+
+		mean = null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, \
+			start_minute=start_minute, incr_minimum=incr_minimum, incr_maximum=incr_maximum, \
+			end_minute=end_minute, start_date=start_date, end_date=end_date, \
+			outliers_flag=outliers_flag)
+		means.append(mean)
+
+	means = np.array(means)
+	return np.mean(means)
+
 	

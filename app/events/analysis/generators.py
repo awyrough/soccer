@@ -25,7 +25,27 @@ def create_artificial_windows_by_fn(
 
 
 def create_random_artificial_windows_with_bounds(
-		start=0, end=90, inc_min=1, inc_max=10):
+		start=0, end=90, inc_min=1, inc_max=90):
+	"""
+	Create artificial windows based on random ints between pre-specified bounds.
+	"""
+	assert start <= end, "end can't be before start"
+	assert inc_min <= inc_max, "minimum increment must be LTE to max"
+	windows = []
+	time = start
+	inc = inc_min
+	while start < end:
+		if inc_min != inc_max:
+			inc = random.randint(inc_min,inc_max)	
+		next = start + inc
+		window = [start, next if next <= end else end]
+		windows.append(window)
+		start = next
+	return windows
+
+
+def create_random_artificial_windows_with_dynamic_bounds(
+		start=0, end=90, inc_min=1, inc_max=90):
 	"""
 	Create artificial windows based on some functions.
 
@@ -44,7 +64,8 @@ def create_random_artificial_windows_with_bounds(
 	inc = inc_min
 	while start < end:
 		if inc_min != inc_max:
-			inc = random.randint(inc_min,inc_max)	
+			inc_max_temp = max(min(90-start,inc_max),inc_min)
+			inc = random.randint(inc_min,inc_max_temp)	
 		next = start + inc
 		window = [start, next if next <= end else end]
 		windows.append(window)

@@ -1,5 +1,10 @@
 # batch_aggregate.py
 
+# sample code: 
+#	python manage.py batch_aggregate_vs_simulate --null_hypo_iterations=5 --max_simulated_incr=10 --print_to_csv
+
+
+
 import datetime
 import csv
 import os
@@ -26,18 +31,21 @@ class Command(BaseCommand):
 		parser.add_argument(
 			"--null_hypo_iterations",
             dest="null_hypo_iterations",
-            default=0,
+            default=15,
             help="number of null hypo iterations?",
             )
+		parser.add_argument(
+			"--max_simulated_incr",
+            dest="max_simulated_incr",
+            default=90,
+            help="max length of simulated increment?",
+            )
 	def handle(self,*args,**options):
-		arg_print_to_csv = options["print_to_csv"]
-		arg_null_hypo_iterations = options["null_hypo_iterations"]
-		
-		null_hypo_iterations = 15
-		if arg_null_hypo_iterations != 0:
-			null_hypo_iterations = int(arg_null_hypo_iterations)
-
 		START = time.time()
+
+		arg_print_to_csv = options["print_to_csv"]
+		max_simulated_incr = int(options["max_simulated_incr"])
+		null_hypo_iterations = int(options["null_hypo_iterations"])
 
 		results = []
 
@@ -46,28 +54,26 @@ class Command(BaseCommand):
 		moment_teams = ["Both", "Self", "Oppo"]
 		metric_info = {
 			0:["passes","sum","per_min"]
-			# ,1:["pass_accuracy","average","total"]
-			# ,2:["pass_balance","average","total"]
-			# ,3:["passes_first_time","sum","per_min"]
-			# ,4:["passes_first_time_accuracy","average","total"]
-			# ,5:["shots","sum","per_min"]
-			# ,6:["shots_on_target","sum","per_min"]
-			# ,7:["shot_accuracy","average","total"]
-			# ,8:["shot_balance","average","total"]
-			# ,9:["final_3rd_entries","sum","per_min"]
-			# ,10:["pen_area_entries","sum","per_min"]
-			# ,11:["pen_area_entry_accuracy","average","total"]
-			# ,12:["tackles","sum","per_min"]
-			# ,13:["tackled","sum","per_min"]
-			# ,14:["interceptions","sum","per_min"]
-			# ,15:["clearances","sum","per_min"]
-			# ,16:["fouls","sum","per_min"]
-			# ,17:["tackle_balance","average","total"]
-			# ,18:["aggression_own","average","total"]
+			,1:["pass_accuracy","average","total"]
+			,2:["pass_balance","average","total"]
+			,3:["passes_first_time","sum","per_min"]
+			,4:["passes_first_time_accuracy","average","total"]
+			,5:["shots","sum","per_min"]
+			,6:["shots_on_target","sum","per_min"]
+			,7:["shot_accuracy","average","total"]
+			,8:["shot_balance","average","total"]
+			,9:["final_3rd_entries","sum","per_min"]
+			,10:["pen_area_entries","sum","per_min"]
+			,11:["pen_area_entry_accuracy","average","total"]
+			,12:["tackles","sum","per_min"]
+			,13:["tackled","sum","per_min"]
+			,14:["interceptions","sum","per_min"]
+			,15:["clearances","sum","per_min"]
+			,16:["fouls","sum","per_min"]
+			,17:["tackle_balance","average","total"]
+			,18:["aggression_own","average","total"]
 		}
-		# min_tws = [5.0, 7.5, 10.0]
-
-		min_tws = [5.0]
+		min_tws = [5.0, 7.5, 10.0, 15.0]
 
 		count = 0
 
@@ -77,7 +83,7 @@ class Command(BaseCommand):
 					for min_tw in min_tws:
 						results.append(aggregate_vs_simulate(sw_id, moment, moment_team, value[0], \
 						value[1], value[2], iterations=null_hypo_iterations, min_tw=min_tw, \
-						outliers_flag=True))
+						outliers_flag=True, max_simulated_incr=max_simulated_incr))
 						
 						count += 1
 						if count % 25 == 0:
@@ -92,7 +98,7 @@ class Command(BaseCommand):
 
 			header=["sw_id", "Team", "moment", "moment_team", "metric_fcn", \
 			"aggregate_fcn", "lift_type", "min_tw", "max_tw", "daterange", \
-			"start_date", "end_date", "simulated_mean","outliers_flag","outlier_count", \
+			"start_date", "end_date", "simulated_mean","simulation_iterations","outliers_flag","outlier_count", \
 			"non_outlier_count", "mean_value", "statistical_significance", \
 			"p_value", "terminal_command"]
 	
@@ -108,8 +114,8 @@ class Command(BaseCommand):
 
 			output.close()
 			
-			print "Total Elapsed Time = %s mins" % str((time.time()-START)/60)
-
 		else:
 			for item in results:
 				print(item)
+
+		print "Total Elapsed Time = %s mins" % str((time.time()-START)/60)

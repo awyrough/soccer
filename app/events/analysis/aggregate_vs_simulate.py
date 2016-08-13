@@ -14,11 +14,11 @@ from events.utils.team import *
 from events.utils.graph import *
 from events.analysis.aggregators import *
 from events.analysis.statistics import *
-from events.analysis.simulate import *
+from events.analysis.simulators import *
 
 def aggregate_vs_simulate(sw_id, moment, moment_team, metric_fcn,
 	aggregate_fcn, lift_type, iterations, daterange=False, min_tw=0.0,
-	max_tw=100.0, print_to_csv=False, outliers_flag=False):
+	max_tw=100.0, print_to_csv=False, outliers_flag=False, max_simulated_incr=90):
 
 	if moment_team not in ["Self", "Oppo", "Both"]:
 		raise Exception("Unknown team identifier: " + str(moment_team) + "\nShould be either Self, Oppo, Both")
@@ -97,7 +97,7 @@ def aggregate_vs_simulate(sw_id, moment, moment_team, metric_fcn,
 	7) Simulate other random time windows 
 	"""
 	simulated_mean = null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn,\
-		lift_type, incr_minimum=min_tw,start_date=start_date, end_date=end_date,\
+		lift_type, incr_minimum=min_tw, incr_maximum=max_simulated_incr,start_date=start_date, end_date=end_date,\
 		outliers_flag=outliers_flag,iterations=iterations)
 
 	"""
@@ -126,8 +126,6 @@ def aggregate_vs_simulate(sw_id, moment, moment_team, metric_fcn,
 	8) Print / Return valuable information
 
 	list columns: 
-	sw_id, Team, moment, moment_team, metric_fcn, aggregate_fcn, lift_type, min_tw, max_tw, daterange, start_date, end_date, outliers_flag \
-		,outlier_count, non_outlier_count, mean_value, statistical_significance, p_value, terminal_command
 	"""
 	f = []
 	f.append(sw_id)
@@ -142,7 +140,8 @@ def aggregate_vs_simulate(sw_id, moment, moment_team, metric_fcn,
 	f.append(daterange)
 	f.append(start_date)
 	f.append(end_date)
-	f.append(simulated_mean)
+	f.append(simulated_mean*100)
+	f.append(iterations)
 	f.append(outliers_flag)
 	f.append(len(outliers))
 	f.append(len(non_outliers))
@@ -151,7 +150,7 @@ def aggregate_vs_simulate(sw_id, moment, moment_team, metric_fcn,
 	f.append(p_val)
 	command = "python manage.py aggregate_stats --sw_id=" + str(sw_id) + " --moment=" + str(moment) + " --moment_team=" + str(moment_team) \
 		+ " --metric_fcn="  + str(metric_fcn) + " --aggregate_fcn=" + str(aggregate_fcn) + " --lift_type=" + str(lift_type) + " --min_tw=" + str(min_tw) \
-		+ " --max_tw=" + str(max_tw) + " --null_hypo" + str(simulated_mean) + " --details"
+		+ " --max_tw=" + str(max_tw) + " --null_hypo=" + str(simulated_mean) + " --details"
 	if daterange:
 		command = command + " --daterange=\"" + str(start_date) + "," + str(end_date) + "\""
 	if outliers_flag:
