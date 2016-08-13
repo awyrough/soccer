@@ -140,7 +140,7 @@ def aggregate(sw_id, moment, moment_team, metric_fcn,
 	f.append(mean*100)
 	f.append(1-p_val)
 	f.append(p_val)
-	command = "python manage.py aggregate_stats --sw_id=" + str(sw_id) + " --moment=" + str(moment) + " --moment_team=" + str(moment_team) \
+	command = "python manage.py single_aggregate --sw_id=" + str(sw_id) + " --moment=" + str(moment) + " --moment_team=" + str(moment_team) \
 		+ " --metric_fcn="  + str(metric_fcn) + " --aggregate_fcn=" + str(aggregate_fcn) + " --lift_type=" + str(lift_type) + " --min_tw=" + str(min_tw) \
 		+ " --max_tw=" + str(max_tw) + " --details"
 	if daterange:

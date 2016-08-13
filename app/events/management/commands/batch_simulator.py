@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand, CommandError
 from games.models import *
 from events.models import *
 
-from events.analysis.simulate import *
+from events.analysis.simulators import *
 
 class Command(BaseCommand):
 	help = 'analyzing multiple aggregate_stats scripts at once'

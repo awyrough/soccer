@@ -1,7 +1,7 @@
-# batch_aggregate.py
+# batch_aggregate_with_simulator.py
 
 # sample code: 
-#	python manage.py batch_aggregate_vs_simulate --null_hypo_iterations=5 --max_simulated_incr=10 --print_to_csv
+#	python manage.py batch_aggregate_with_simulator --null_hypo_iterations=5 --max_simulated_incr=10 --print_to_csv
 
 
 
@@ -14,13 +14,19 @@ from django.core.management.base import BaseCommand, CommandError
 from games.models import *
 from events.models import *
 
-from events.analysis.aggregate_vs_simulate import *
+from events.analysis.aggregate_with_simulator import *
 
 class Command(BaseCommand):
 	help = 'analyzing multiple aggregate_stats scripts at once'
 
 	def add_arguments(self,parser):
 		# add optional print to csv flag
+		parser.add_argument(
+			"--sw_id",
+			dest="sw_id",
+			default="",
+			help="sw_id to identify team on which to analyze",
+			)
 		parser.add_argument(
 			"--print_to_csv",
 			action="store_true",
@@ -41,6 +47,10 @@ class Command(BaseCommand):
             help="max length of simulated increment?",
             )
 	def handle(self,*args,**options):
+		if not options["sw_id"]:
+			raise Exception("A sw_id is required for analysis")
+
+		sw_id = int(options["sw_id"])
 		START = time.time()
 
 		arg_print_to_csv = options["print_to_csv"]
@@ -49,7 +59,6 @@ class Command(BaseCommand):
 
 		results = []
 
-		sw_id = 3
 		moments = ["GOAL"]
 		moment_teams = ["Both", "Self", "Oppo"]
 		metric_info = {
