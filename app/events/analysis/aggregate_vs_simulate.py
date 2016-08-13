@@ -97,7 +97,7 @@ def aggregate_vs_simulate(sw_id, moment, moment_team, metric_fcn,
 	7) Simulate other random time windows 
 	"""
 	simulated_mean = null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn,\
-		lift_type, incr_minimum=min_tw, incr_maximum=max_simulated_incr,start_date=start_date, end_date=end_date,\
+		lift_type, incr_minimum=int(min_tw), incr_maximum=max_simulated_incr,start_date=start_date, end_date=end_date,\
 		outliers_flag=outliers_flag,iterations=iterations)
 
 	"""

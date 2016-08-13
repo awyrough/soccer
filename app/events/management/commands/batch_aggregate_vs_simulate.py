@@ -88,7 +88,7 @@ class Command(BaseCommand):
 						count += 1
 						if count % 25 == 0:
 							print "Analyzed %s Aggregations" % str(count)
-							print "Elapsed Time = %s mins" % str((time.time()-START)/60)
+							print "Elapsed Time = %s mins; \t %s" % (str((time.time()-START)/60), time.strftime('%l:%M%p %Z'))
 
 
 
@@ -103,7 +103,7 @@ class Command(BaseCommand):
 			"p_value", "terminal_command"]
 	
 			os.chdir("/Users/Swoboda/Desktop/")
-			output_filename = "analysis_results.csv"
+			output_filename = str(sw_id) + "__"+ str(time.strftime('%Y_%m_%d')) +"_analysis_results.csv"
 			output = open(output_filename, "a")
 			writer = csv.writer(output, lineterminator="\n")
 
