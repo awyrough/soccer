@@ -59,7 +59,8 @@ class Command(BaseCommand):
 
 		results = []
 
-		moments = ["GOAL"]
+		moments = ["GOAL", "SUBSTITUTION", "YELLOW_CARD"]
+		# moments = ["SUBSTITUTION", "YELLOW_CARD"]
 		moment_teams = ["Both", "Self", "Oppo"]
 		metric_info = {
 			0:["passes","sum","per_min"]
@@ -87,6 +88,8 @@ class Command(BaseCommand):
 		count = 0
 
 		for moment in moments:
+			if moment == "SUBSTITUTION":
+				max_simulated_incr = 30
 			for key, value in metric_info.iteritems():
 				for moment_team in moment_teams:
 					for min_tw in min_tws:
