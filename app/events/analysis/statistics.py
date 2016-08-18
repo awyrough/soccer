@@ -96,7 +96,7 @@ def twosample__statistical_significance(actual_lifts_tuple_list, simulated_tuple
 
 	mean = np.mean(actual)
 	#use Welch's t-test (http://iaingallagher.tumblr.com/post/50980987285/t-tests-in-python)
-	t_statistic, p_value = ttest_ind(actual, simulated_tuple_list, equal_var=False)
+	t_statistic, p_value = ttest_ind(actual, simulated, equal_var=False)
 	
 	return actual_mean, simulated_mean, t_statistic, p_value
 

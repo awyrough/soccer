@@ -255,17 +255,6 @@ def null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn, lift_
 
 	means = []
 	for x in range(0,iterations):
-		# print "\n iteration ", x
-		# print sw_id
-		# print metric_fcn
-		# print aggregate_fcn
-		# print lift_type
-		# print start_minute
-		# print end_minute
-		# print incr_maximum
-		# print incr_minimum
-		# print outliers_flag
-
 		mean = null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, \
 			start_minute=start_minute, incr_minimum=incr_minimum, incr_maximum=incr_maximum, \
 			end_minute=end_minute, start_date=start_date, end_date=end_date, \
@@ -273,6 +262,10 @@ def null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn, lift_
 		means.append(mean)
 
 	means = np.array(means)
-	return np.mean(means), means
+	means_list = [] #creating to feed into grapher / other funcs that take list of tuples
+	for m in means:
+		means_list.append((m,))
+
+	return np.mean(means), means_list
 
 	
