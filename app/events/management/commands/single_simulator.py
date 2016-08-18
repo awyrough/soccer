@@ -74,7 +74,7 @@ class Command(BaseCommand):
 		parser.add_argument(
 			"--end_minute",
             dest="end_minute",
-            default=0,
+            default=90,
             help="Simulation end minute",
             )			
 		parser.add_argument(

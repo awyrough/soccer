@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats
 from scipy.stats import ttest_1samp, wilcoxon, ttest_ind, mannwhitneyu
 
 
@@ -62,20 +63,42 @@ def calculate_lift(games, agg_collection, lift_fcn, min_time_window=0):
 def extract_only_indexed_values(lift_array, index):
 	x = []
 	for item in lift_array:
+		if type(item) != type((1,1)): #if the array is of tuples,
+			x = lift_array
+			break
 		x.append(item[index])
+
 	return x
 
-def statistical_significance(lifts_tuple_list, null_hypo = 0):
+def onesample__statistical_significance(actual_lifts_tuple_list, null_hypo = 0):
 	"""
 	Method to input lifts and understand statistical significance of measurement	
 	"""
-	lifts = extract_only_indexed_values(lifts_tuple_list, 0)
-	lifts = np.array(lifts)
+	actual = extract_only_indexed_values(actual_lifts_tuple_list, 0)
+	actual = np.array(actual)
 	
-	mean = np.mean(lifts)
-	t_statistic, p_value = ttest_1samp(lifts, null_hypo)
+	mean = np.mean(actual)
+	t_statistic, p_value = ttest_1samp(actual, null_hypo)
 	
 	return mean, t_statistic, p_value
+
+def twosample__statistical_significance(actual_lifts_tuple_list, simulated_tuple_list):
+	"""
+	Method to input lifts and understand statistical significance of measurement	
+	"""
+	actual = extract_only_indexed_values(actual_lifts_tuple_list, 0)
+	actual = np.array(actual)
+	actual_mean = np.mean(actual)
+
+	simulated = extract_only_indexed_values(simulated_tuple_list, 0)
+	simulated = np.array(simulated)
+	simulated_mean = np.mean(simulated)
+
+	mean = np.mean(actual)
+	#use Welch's t-test (http://iaingallagher.tumblr.com/post/50980987285/t-tests-in-python)
+	t_statistic, p_value = ttest_ind(actual, simulated_tuple_list, equal_var=False)
+	
+	return actual_mean, simulated_mean, t_statistic, p_value
 
 def is_outlier(points, thresh=4):
     """

@@ -43,17 +43,17 @@ class Command(BaseCommand):
 		sw_id = 3
 		metric_info = {
 			0:["passes","sum","per_min"]
-			,1:["pass_accuracy","average","total"]
-			,2:["pass_balance","average","total"]
-			,3:["passes_first_time","sum","per_min"]
-			,4:["passes_first_time_accuracy","average","total"]
-			,5:["shots","sum","per_min"]
-			,6:["shots_on_target","sum","per_min"]
-			,7:["shot_accuracy","average","total"]
-			,8:["shot_balance","average","total"]
-			,9:["final_3rd_entries","sum","per_min"]
-			,10:["pen_area_entries","sum","per_min"]
-			,11:["pen_area_entry_accuracy","average","total"]
+			# ,1:["pass_accuracy","average","total"]
+			# ,2:["pass_balance","average","total"]
+			# ,3:["passes_first_time","sum","per_min"]
+			# ,4:["passes_first_time_accuracy","average","total"]
+			# ,5:["shots","sum","per_min"]
+			# ,6:["shots_on_target","sum","per_min"]
+			# ,7:["shot_accuracy","average","total"]
+			# ,8:["shot_balance","average","total"]
+			# ,9:["final_3rd_entries","sum","per_min"]
+			# ,10:["pen_area_entries","sum","per_min"]
+			# ,11:["pen_area_entry_accuracy","average","total"]
 			# ,12:["tackles","sum","per_min"]
 			# ,13:["tackled","sum","per_min"]
 			# ,14:["interceptions","sum","per_min"]
@@ -63,13 +63,15 @@ class Command(BaseCommand):
 			# ,18:["aggression_own","average","total"]
 		}
 
-		increments = [(5,5),(10,10),(15,15),(30,30),(45,45),\
-						(5,10),(5,15),(5,30),(5,45),(5,60),\
-						(10,15),(10,30),(10,45),(10,60),\
-						(15,30),(15,45),(15,60),\
-						(15,90),(30,60)]
+		# increments = [(5,5),(10,10),(15,15),(30,30),(45,45),\
+		# 				(5,10),(5,15),(5,30),(5,45),(5,60),\
+		# 				(10,15),(10,30),(10,45),(10,60),\
+		# 				(15,30),(15,45),(15,60),\
+		# 				(15,90),(30,60)]
+		increments = [(5,90)]
 		count = 0
 
+		temp_single_collector = []
 		for key, value in metric_info.iteritems():
 			for increment_pair in increments:
 				if increment_pair[0] == increment_pair[1]:
@@ -80,9 +82,11 @@ class Command(BaseCommand):
 				iter_pool = []
 				
 				for x in range(1, arg_iters+1):
-					main, non_numerical, numerical = simulate(sw_id, value[0], \
+					main, non_numerical, numerical, raw_mean= simulate(sw_id, value[0], \
 					value[1], value[2], incr_minimum=increment_pair[0], \
 					incr_maximum=increment_pair[1], outliers_flag=True, iteration=x)
+
+					temp_single_collector.append([float(raw_mean), '2015-01-01'])
 
 					count += 1
 					if count % 25 == 0:
@@ -95,6 +99,9 @@ class Command(BaseCommand):
 				#add the average row in
 				results.append(average_iterations(non_numerical, iter_pool, arg_iters))
 
+		for item in temp_single_collector:
+			print item
+		plot_scatterplot(temp_single_collector, "simulation of passes; min=5, max=90")
 
 		if arg_print_to_csv:
 

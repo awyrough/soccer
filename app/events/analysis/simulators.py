@@ -160,7 +160,7 @@ def simulate(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0,
 
 	non_numerical = f[0:13]
 	numerical = f[14:19]
-	return f, non_numerical, numerical
+	return f, non_numerical, numerical, mean
 
 
 def null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
@@ -242,8 +242,10 @@ def null_hypothesis_simulator(sw_id, metric_fcn, aggregate_fcn, lift_type, start
 	"""
 	8) Return mean lift value for this simulation run (to then be averaged)
 	"""
-	mean, t_stat, p_val = statistical_significance(lift_info)
-	return mean
+	lift_info = extract_only_indexed_values(lift_info,0)
+	lift_info = np.array(lift_info)
+
+	return np.mean(lift_info)
 
 def null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn, lift_type, start_minute=0, 
 	end_minute=90, incr_minimum=5, incr_maximum=90, start_date=False, end_date=False,
@@ -271,6 +273,6 @@ def null_hypothesis_simulator_iterations(sw_id, metric_fcn, aggregate_fcn, lift_
 		means.append(mean)
 
 	means = np.array(means)
-	return np.mean(means)
+	return np.mean(means), means
 
 	
