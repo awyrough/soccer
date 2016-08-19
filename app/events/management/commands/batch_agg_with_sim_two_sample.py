@@ -94,7 +94,7 @@ class Command(BaseCommand):
 			if count == 0:
 				header = head
 			count += 1
-			if count % 10 == 0:
+			if count % 5 == 0:
 				print "Analyzed %s Aggregation-Simulation Combinations" % str(count)
 				print "		delta = %s mins; elapsed = %s mins; \t %s" % (str((time.time()-prev_time)/60), str((time.time()-START)/60), time.strftime('%l:%M%p %Z'))	
 				prev_time = time.time()
