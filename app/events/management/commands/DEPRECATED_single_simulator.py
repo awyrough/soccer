@@ -23,7 +23,6 @@ from events.utils.graph import *
 from events.analysis.aggregators import *
 from events.analysis.generators import *
 from events.analysis.statistics import *
-from events.analysis.simulators import *
 
 class Command(BaseCommand):
 	help = 'querying file to pull team StatisticEvents'
@@ -124,8 +123,8 @@ class Command(BaseCommand):
 		arg_sw_id = options["sw_id"]
 		arg_metric_fcn = options["metric_fcn"]
 		arg_aggregate_fcn = options["aggregate_fcn"]
-		arg_incr_min = int(options["incr_min"])
-		arg_incr_max = int(options["incr_max"])
+		arg_incr_min = float(options["incr_min"])
+		arg_incr_max = float(options["incr_max"])
 		arg_start_minute = float(options["start_minute"])
 		arg_end_minute = float(options["end_minute"])
 
@@ -152,16 +151,85 @@ class Command(BaseCommand):
 		else:
 			arg_print_to_csv = False
 		
+		"""
+		2) Find all relevant games
+		"""
+		# pull the team name
+		arg_team = Team.objects.get(sw_id=arg_sw_id)
+		print("TEAM: " + str(arg_team) + "\n")
 
-		iterations = 100
+		# find all home/away games for the team, and order ASC by date
+		games = get_team_games(arg_team, arg_start_date, arg_end_date)
+		
+		"""
+		3) Pull time windows, meta information, and aggregate tally of the moments for analysis
+		"""
+		time_windows = {}
+		meta_info = {}
+		agg_tally_moments = {}
+		for game in games:
+			time_windows[game] = create_random_artificial_windows_with_bounds(start=arg_start_minute, \
+			end=arg_end_minute, inc_min=arg_incr_min, inc_max=arg_incr_max)
+
+			meta_info[game] = []
+			agg_tally_moments[game] = []
+			for item in time_windows[game]:
+				meta_info[game].append("Simulation")
+				agg_tally_moments[game].append(0)	
 
 		"""
-		2) Simulate
+		4) Aggregate metric over time windows
 		"""
-		sim_global_mean, sim_mean_list = null_hypothesis_simulator_iterations(arg_sw_id, arg_metric_fcn, arg_aggregate_fcn,\
-		arg_lift_type, incr_minimum=arg_incr_min, incr_maximum=arg_incr_max,start_date=arg_start_date, end_date=arg_end_date,\
-		outliers_flag=arg_outliers,iterations=iterations)
+		agg_stats = {}
+		for game in games:
+			agg_stats[game] = do_collect_and_aggregate(arg_team, game \
+					,windows=time_windows[game], meta_info=meta_info[game] \
+					,agg_tally_moments=agg_tally_moments[game] \
+					,metric_fcn=MAP_METRIC_FCN[arg_metric_fcn] \
+					,aggregate_fcn=MAP_AGGREGATE_FCN[arg_aggregate_fcn])
 
-		for item in sim_mean_list:
-			print item[0]
+
+		"""
+		5) Calculate Lifts
+		"""
+		lift_info, agg_stats = calculate_lift(games, agg_stats, MAP_LIFT_TYPE_FCN[arg_lift_type], arg_min_tw)
+		# for game in games:
+		# 	print("\n" + str(game))
+		# 	for item in agg_stats[game]:
+		# 		print(agg_stats[game][item])
+
+		# print("\n \n \n \n")
+
+		"""
+		6) Calculate Outliers
+		"""
+		if arg_outliers:
+			non_outliers, outliers = run_outlier_check(lift_info)
+
+			# print "outlier count = ", len(outliers)
+			# print "outliers:"
+			for item in outliers:
+				print '%s, on %s. z-score = %s' % (item[0],item[1],item[2])
+			print("\n")
+
+			# print "non_outlier count", len(non_outliers)
+
+			lift_info = non_outliers
+
+		"""
+		7) Calculate Statistical Significance
+		"""
+		mean, t_stat, p_val = statistical_significance(lift_info)
+
+		mean = round(mean, 8)
+
+		print "mean percentage lift = ", (mean*100)
+		print "statistical significance = ", ((1-p_val))
+		print("\n \n \n \n")
+
+		"""
+		8) Plot output as a scatter plot
+		"""
+		plot_scatterplot(lift_info, "simulation")
+
 	

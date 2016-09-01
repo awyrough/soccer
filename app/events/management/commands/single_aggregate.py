@@ -175,6 +175,8 @@ class Command(BaseCommand):
 		else:
 			arg_details = False
 
+		arg_null_hypo = float(options["null_hypo"])
+
 		"""
 		2) Find all relevant games
 		"""
@@ -246,10 +248,10 @@ class Command(BaseCommand):
 			print "Time Window Minimum Limit of %s Mins " % (arg_min_tw)
 			print("\n")
 
-		mean, t_stat, p_val = statistical_significance(lift_info, null_hypo)
+		mean, t_stat, p_val = onesample__statistical_significance(lift_info, arg_null_hypo)
 
 		mean = round(mean, 8)
-		print "Null Hypothesis = ", null_hypo
+		print "Null Hypothesis = ", arg_null_hypo
 		print "Mean Percentage Change = ", (mean*100)
 		print "Statistical Significance = ", ((1-p_val))
 		print("")
@@ -268,4 +270,8 @@ class Command(BaseCommand):
 				(str(arg_team), str(arg_metric_fcn), str(arg_moment), str(arg_moment_team), str(arg_min_tw), str(arg_outliers))
 		plot_scatterplot(lift_info, title)
 
-	
+		"""
+		10) Print data to copy into Excel
+		"""
+		for item in lift_info:
+			print "%s \t %s" % (str(item[0]), str(item[1]))
