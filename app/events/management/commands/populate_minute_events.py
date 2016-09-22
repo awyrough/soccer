@@ -72,9 +72,6 @@ class Command(BaseCommand):
             if away_team_name == "Los Angeles Galaxy":
                 away_team_name = "Galaxy"
 
-            print home_team_name
-            print away_team_name
-
             if (home_team_name in name_to_team):
                 home_team = name_to_team[home_team_name]
             else:
@@ -88,6 +85,8 @@ class Command(BaseCommand):
                 name_to_team[away_team_name] = away_team
 
             date = datetime.datetime.strptime(event[2], "%d/%m/%Y")
+            
+            print '%s vs %s on %s' % (home_team_name, away_team_name, date)
                 
             game = Game.objects.filter(date=date) \
                 .filter(home_team=home_team) \
@@ -180,4 +179,4 @@ class Command(BaseCommand):
                 .filter(game__in=list(games)) \
                 .distinct().delete()
         all_created = TimeEvent.objects.bulk_create(minute_events)
-        print("Created %d minute events" % len(all_created))
+        print("Created and saved %d minute events" % len(all_created))

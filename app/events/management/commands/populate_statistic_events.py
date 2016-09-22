@@ -123,4 +123,4 @@ class Command(BaseCommand):
                 .filter(game__in=list(games)) \
                 .distinct().delete()
         all_created = StatisticEvent.objects.bulk_create(statistic_events)
-        print("Created %d statistic events" % len(all_created))
+        print("Created and saved %d statistic events" % len(all_created))
