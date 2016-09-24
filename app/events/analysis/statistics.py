@@ -160,4 +160,14 @@ def run_outlier_check(points_tuple_list):
 
 	return non_outliers, outliers
 
+def relative_performance(moment_perf, simulated_perf):
+	if moment_perf > simulated_perf:
+		sign = 1
+	elif moment_perf < simulated_perf:
+		sign = -1
+	else:
+		sign = 0
 
+	percent_chg = round(abs((moment_perf - simulated_perf) / simulated_perf),1)
+
+	return sign*percent_chg

@@ -3,7 +3,7 @@
 # INPUT: 
 # OUTPUT:
 
-import datetime
+from datetime import datetime
 
 from django.core.management.base import BaseCommand, CommandError
 from games.models import *
@@ -172,8 +172,9 @@ def aggregate_vs_simulate_two_sample(sw_id, moment, moment_team, metric_fcn,
 	end_date = False
 	if daterange:
 		daterange = daterange.split(",")
-		start_date = datetime.datetime.strptime(daterange[0], "%Y-%m-%d")
-		end_date = datetime.datetime.strptime(daterange[1], "%Y-%m-%d")
+
+		start_date = datetime.strptime(daterange[0], "%Y-%m-%d")
+		end_date = datetime.strptime(daterange[1], "%Y-%m-%d")
 
 		if start_date > end_date:
 			raise Exception("Wrong date order")
@@ -278,6 +279,7 @@ def aggregate_vs_simulate_two_sample(sw_id, moment, moment_team, metric_fcn,
 		,"max_simulated_incr"
 		,"actual_mean"
 		,"simulated_mean"
+		,"relative_performance"
 		,"two_sample_sig"
 		,"two_sample_pval"
 		,"one_sample_sig"
@@ -305,6 +307,7 @@ def aggregate_vs_simulate_two_sample(sw_id, moment, moment_team, metric_fcn,
 	f.append(max_simulated_incr)
 	f.append(twosample__actual_mean*100)
 	f.append(twosample__sim_mean*100)
+	f.append(relative_performance(twosample__actual_mean, twosample__sim_mean))
 	f.append(1-twosample__p_val)
 	f.append(twosample__p_val)
 	f.append(1-onesample__p_val)
