@@ -1,5 +1,4 @@
-# batch_agg_with_sim_two_sample.py.py
-
+# batch_agg_with_sim_two_sample_2016.py
 
 import datetime
 import csv
@@ -42,6 +41,7 @@ class Command(BaseCommand):
             default="",
             help="addition to filename?",
             )
+
 	def handle(self,*args,**options):
 		START = time.time()
 		prev_time = START
@@ -59,6 +59,8 @@ class Command(BaseCommand):
 		sw_ids = [2, 3, 6, 8]
 		moments_and_maxSimWindows = [("GOAL", 60), ("SUBSTITUTION", 30), ("YELLOW_CARD", 45)]
 		moment_teams = ["Both", "Self", "Oppo"]
+		min_tws = [5.0]	
+		# min_tws = [5.0, 7.5, 10.0, 15.0]
 		other_info = {
 			#key: metric_fcn, aggregation_fcn, lift_type
 			0:["passes","sum","per_min"]
@@ -81,9 +83,8 @@ class Command(BaseCommand):
 			,17:["tackle_balance","average","total"]
 			,18:["aggression_own","average","total"]
 		}
-		# min_tws = [5.0, 7.5, 10.0, 15.0]
-		min_tws = [5.0]
-		
+
+		#load in the various variable criteria to then run the scripts
 		for sw_id in sw_ids:
 			for item in moments_and_maxSimWindows:
 				moment = item[0]
