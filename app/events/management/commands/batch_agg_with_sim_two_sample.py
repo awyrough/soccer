@@ -30,12 +30,14 @@ class Command(BaseCommand):
             default="",
             help="number of null hypo iterations?",
             )
+
 	def handle(self,*args,**options):
+		START = time.time()
+		prev_time = START
+
 		if not options["simulation_iterations"]:
 			raise Exception("Number of simulation iterations is needed")
 
-		START = time.time()
-		prev_time = START
 		arg_print_to_csv = options["print_to_csv"]
 		simulation_iterations = int(options["simulation_iterations"])
 
