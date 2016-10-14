@@ -54,8 +54,8 @@ FOULED = lambda x: x.fouled
 TACKLES = lambda x: x.tackles
 TACKLED = lambda x: x.tackled
 TACKLE_BALANCE = lambda x: ratio_with_nones(x.tackles, x.tackles + x.tackled)
-AGGRESSION_OWN = lambda x: ratio_with_nones(x.fouls, x.tackles)
-AGGRESSION_OPP = lambda x: ratio_with_nones(x.fouled, x.tackled) 
+AGGRESSION_OWN = lambda x: ratio_with_nones(x.fouls, x.fouls + x.tackles)
+AGGRESSION_OPP = lambda x: ratio_with_nones(x.fouled, x.fouled + x.tackled) 
 YELLOW_CARDS = lambda x: x.yellow_cards
 RED_CARDS = lambda x: x.red_cards 
 

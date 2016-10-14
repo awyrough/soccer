@@ -56,13 +56,14 @@ class Command(BaseCommand):
 		results = []
 		VARIABLE_CRITERIA = []
 
-		sw_ids = [2, 3, 6, 8]
+		sw_ids = #[3, 6, 8]#[2, 3, 6, 8]
 		moments_and_maxSimWindows = [("GOAL", 60), ("SUBSTITUTION", 30), ("YELLOW_CARD", 45)]
-		moment_teams = ["Both", "Self", "Oppo"]
+		# moment_teams = ["Both", "Self", "Oppo"]
+		moment_teams = ["Self", "Oppo"]
 		min_tws = [5.0]	
 		# min_tws = [5.0, 7.5, 10.0, 15.0]
 		other_info = {
-			#key: metric_fcn, aggregation_fcn, lift_type
+			key: metric_fcn, aggregation_fcn, lift_type
 			0:["passes","sum","per_min"]
 			,1:["pass_accuracy","average","total"]
 			,2:["pass_balance","average","total"]
@@ -72,16 +73,16 @@ class Command(BaseCommand):
 			,6:["shots_on_target","sum","per_min"]
 			,7:["shot_accuracy","average","total"]
 			,8:["shot_balance","average","total"]
-			,9:["final_3rd_entries","sum","per_min"]
-			,10:["pen_area_entries","sum","per_min"]
-			,11:["pen_area_entry_accuracy","average","total"]
-			,12:["tackles","sum","per_min"]
-			,13:["tackled","sum","per_min"]
-			,14:["interceptions","sum","per_min"]
-			,15:["clearances","sum","per_min"]
-			,16:["fouls","sum","per_min"]
-			,17:["tackle_balance","average","total"]
-			,18:["aggression_own","average","total"]
+			,9:["pen_area_entries","sum","per_min"]
+			,10:["pen_area_entry_accuracy","average","total"]
+			,11:["final_3rd_entries","sum","per_min"]
+			,12:["fouls","sum","per_min"]
+			,13:["tackles","sum","per_min"]
+			,14:["tackled","sum","per_min"]
+			,15:["tackle_balance","average","total"]
+			,16:["interceptions","sum","per_min"]
+			,17:["clearances","sum","per_min"]
+			18:["aggression_own","average","total"]
 		}
 
 		#load in the various variable criteria to then run the scripts
